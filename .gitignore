@@ -14,3 +14,7 @@
 # Ignore frontend and backend editor files
 /backend/.vscode/
 /frontend/.vscode/
+
+# Ignore Dumps Directory
+/dumps
+/backend/dumps
