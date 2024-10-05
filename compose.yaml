@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    # environment:
+    #   - COMPOSER_HOME=app/composer
+    #   - COMPOSER_CACHE_DIR=app/composer/cache
+    volumes:
+      - ./backend:/var/www/html
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  db:
+    image: mysql:9.0.1
+    environment:
+      - MYSQL_ROOT_PASSWORD= ""
+      - MYSQL_DATABASE=symfony
+      # - MYSQL_USER=root
+      - MYSQL_PASSWORD= ""
+      - MYSQL_ALLOW_EMPTY_PASSWORD = true
+      - MYSQL_RANDOM_ROOT_PASSWORD = false
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  composer_cache:
+  mysql_data:
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+  db_password:
+    file: ./secrets/db_password.txt

@@ -18,3 +18,7 @@
 # Ignore Dumps Directory
 /dumps
 /backend/dumps
+
+# Ignore Local Resources Directory
+/local_resources
+/local_resources/*
