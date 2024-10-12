@@ -2,25 +2,51 @@ version: '3.8'
 
 services:
   backend:
-    extends:
-      file: ./backend/docker-compose.yaml
-      service: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      - APP_ENV=dev
+      - DATABASE_URL=mysql://root:@db:3306/zoo
 
   frontend:
-    extends:
-      file: ./frontend/docker-compose.yaml
-      service: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
 
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend/public:/var/www/html/public
+      - ./backend/docker/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - backend
       - frontend
 
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=zoo
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
+
 networks:
   default:
-    name: zoo-webapp-network
+    name: symfony-react-network

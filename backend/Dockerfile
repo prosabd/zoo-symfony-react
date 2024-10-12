@@ -1,33 +1,6 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
-# Setup user
-RUN useradd www
-
-# Install system packeges
-RUN apt-get update && apt-get install -y supervisor nginx lsb-release wget
-
-# Add repos
-RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
-
-# Install PHP dependencies
-RUN apt update && apt install -y php7.4-fpm
-
-# Configure php-fpm and nginx
-COPY config/fpm.conf /etc/php/7.4/fpm/php-fpm.conf
-COPY config/supervisord.conf /etc/supervisord.conf
-COPY config/nginx.conf /etc/nginx/nginx.conf
-
-# Copy challenge files
-COPY challenge /www
-
-# Setup permissions
-RUN chown -R www:www /www /var/lib/nginx
-
-# Copy flag
-COPY flag /flag
-
-# Install system dependencies
+# Install system packages and PHP extensions
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -35,31 +8,41 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    supervisor \
+    nginx \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# PHP
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Apache
-RUN a2enmod rewrite
-RUN service apache2 restart
-
-# Get latest Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR '/backend'
+WORKDIR /var/www/html
 
-# Copy the composer.lock and composer.json files
-COPY composer.lock composer.json ./
+# Copy composer files
+COPY composer.json composer.lock ./
 
-# Install the dependencies
-RUN composer install --no-dev --prefer-dist --no-scripts
+# Install dependencies
+RUN composer install --no-scripts --no-autoloader
 
+# Copy project files
 COPY . .
-EXPOSE 8000
 
-CMD ["php", "-S", "127.0.0.1:8000", "-t", "public"]
+# Generate autoloader
+RUN composer dump-autoload --optimize
+
+# Copy configuration files
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create the storage directory
+RUN mkdir -p /var/www/html/storage
+# Change ownership and Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage
+
+EXPOSE 80
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
