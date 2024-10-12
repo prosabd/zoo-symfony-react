@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    extends:
+      file: ./backend/docker-compose.yaml
+      service: backend
+
+  frontend:
+    extends:
+      file: ./frontend/docker-compose.yaml
+      service: frontend
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend
+
+networks:
+  default:
+    name: zoo-webapp-network
