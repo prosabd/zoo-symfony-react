@@ -8,8 +8,6 @@ framework:
 
     #esi: true
     #fragments: true
-    storage:
-        path: '%kernel.project_dir%/public/storage'
 
 when@test:
     framework:
