@@ -41,7 +41,7 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p /var/www/html/storage
 # Change ownership and Set permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage
+    && chmod -R 755 /var/www/html/
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
