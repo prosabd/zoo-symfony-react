@@ -2,17 +2,22 @@
 
 namespace App\Entity;
 
-use App\Repository\ContinentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use App\Repository\ContinentRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ContinentRepository::class)]
+#[ApiResource]
 class Continent
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read'])]  // Only readable, not writable
+
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

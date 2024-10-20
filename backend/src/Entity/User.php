@@ -2,18 +2,22 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read'])]  // Only readable, not writable
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -28,8 +32,8 @@ class User
     #[ORM\Column]
     private ?bool $is_admin = null;
 
-    #[ORM\Column(type: Types::ARRAY, nullable: true)]
-    private ?array $role = null;
+    #[ORM\Column(type: Types::ARRAY, nullable: false)]
+    private ?array $roles;
 
     public function getId(): ?int
     {
@@ -84,15 +88,25 @@ class User
         return $this;
     }
 
-    public function getRole(): ?array
+    public function getRoles(): array
     {
-        return $this->role;
+        return $this->roles;
     }
 
     public function setRole(?array $role): static
     {
-        $this->role = $role;
+        $this->roles[] = $role;
 
         return $this;
+    }
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->id;
     }
 }
