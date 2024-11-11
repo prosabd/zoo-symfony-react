@@ -5,6 +5,17 @@
   text-align: center;
 }
 
+a {
+  color: var(--foreground);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
 /* .logo {
   height: 6em;
   padding: 1.5em;

@@ -1,75 +1,91 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "@/assets/styles/Home.css";
-import { Sidebar, SidebarContent, SidebarProvider } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// import Navbar from '@/components/Navbar';
-// import Card from '@/components/Card';
-// import Footer from '@/components/Footer';
-
-interface Props {}
 
 interface Animal {
   id: number;
   name: string;
   description: string;
-  imageUrl: string;
 }
 
-interface State {
-  animals: Animal[];
-}
+const Home: React.FC = () => {
+  const [animals, setAnimals] = useState<Animal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-class Home extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      animals: [],
+  const getRandomAnimals = (array: Animal[], count: number) => {
+    const limitedArray = array.slice(0, 30);
+    const shuffled = [...limitedArray].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    const fetchAnimals = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get<Animal[]>("http://localhost:8000/api/animals", {
+          signal: controller.signal,
+        });
+        const animalData = response.data['member'] || [];
+        setAnimals(getRandomAnimals(animalData, 3));
+        setError(null);
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          setError("Failed to fetch animals");
+          console.error(err);
+        }
+      } finally {
+        setLoading(false);
+      }
     };
-  }
 
-  componentDidMount() {
-    console.log("Component did mount");
-    axios
-      .get("localhost:8000/api/animals")
-      .then((res) => {
-        this.setState({ animals: res.data });
-        console.log("test");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+    fetchAnimals();
+    
+    return () => controller.abort();
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <SidebarProvider defaultOpen={true}>
-          <div className="flex min-h-screen">
-            <Sidebar variant="sidebar" side="left">
-              <SidebarContent>
-                {/* Sidebar content goes here */}
-                <Button variant="default">Click me</Button>
-              </SidebarContent>
-            </Sidebar>
-          </div>
-        </SidebarProvider>
-        <h1>Home</h1>
-        <Button variant="default">Click me</Button>
-        {/* <Sidebar variant="sidebar" side="left" /> */}
-        {/* <Navbar /> */}
-        {/* {this.state.animals.map(animal => (
-                    <Card 
-                        key={animal.id}  // Assuming `id` is a unique identifier for each animal
-                        title={animal.name} 
-                        description={animal.description} 
-                        imageUrl={animal.imageUrl} 
-                    />
-                ))}
-                <Footer /> */}
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Welcome ZooExplorer of Animals</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {animals.map(animal => (
+          <Card key={animal.id} className="overflow-hidden">
+            <CardHeader className="p-0">
+              <img 
+                src={`https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/${animal.name.replace(' ', '_')}.jpg`}
+                alt={animal.name}
+                className="w-full h-48 object-cover"
+              />
+            </CardHeader>
+            <CardContent className="p-4">
+              <CardTitle className="text-xl mb-2">{animal.name}</CardTitle>
+              <CardDescription>{animal.description}</CardDescription>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    );
-  }
-}
+
+      <div className="text-center">
+        <Button 
+          variant="default" 
+          size="lg"
+          onClick={() => navigate('/animals')}
+          className="px-8"
+        >
+          View All Animals
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export default Home;
