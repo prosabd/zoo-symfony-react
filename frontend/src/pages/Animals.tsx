@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 interface Family {
@@ -25,6 +27,7 @@ const Home: React.FC = () => {
   // Page part
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [order, setOrder] = useState("asc");
   const [error, setError] = useState<string | null>(null);
   const [response, setResponse] = useState<any | null>(null);
 
@@ -106,16 +109,29 @@ const Home: React.FC = () => {
   useEffect(() => {
     fetchAnimals(page);
     return () => {};
-  }, [page, familyParam]);
+  }, [page, familyParam, order]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 text-center">
+          <div className="w-48 mx-auto p-4">
+            <Label htmlFor="order">Order</Label>
+            <Select onValueChange={setOrder} defaultValue={order}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Order" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asc">Ascending</SelectItem>
+                <SelectItem value="desc">Descending</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.isArray(animals) && animals.map(animal => (
+          {/* // Sort element by name (or order value selected) and display them */}
+          {Array.isArray(animals) && animals.sort((a, b) => order === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)).map(animal => (
             <Card key={animal.id} className="overflow-hidden">
               <CardHeader className="p-0">
                 <img 
@@ -137,22 +153,14 @@ const Home: React.FC = () => {
             </Card>
           ))}
         </div>
-        {response?.data?.view?.previous && (
-          <Button 
-            className="mt-4 mx-2 " 
-            onClick={handlePreviousPage}
-          > 
+          <Button className="mt-4 mx-2 " onClick={handlePreviousPage} disabled={page <= 1}> 
             Previous Page
           </Button>
-        )}
-        {response?.data?.view?.next && (
-          <Button 
-            className="mt-4 mx-2" 
-            onClick={handleNextPage}
-          > 
+          <Button className="mt-4 mx-2" onClick={handleNextPage} 
+                  //verify if the current page is the last page, if it is, disable the next button
+                  disabled={response?.data?.view?.['@id'] === response?.data?.view?.last}> 
             Next Page
           </Button>
-        )}
       </div>
     </>
   );
