@@ -57,27 +57,14 @@ const Home: React.FC = () => {
       });
       console.log(response);
       setResponse(response);
-      const animalData = response.data['member'] || [];
-      
-      // // Filter by family if family parameter exists
-      // if (familyParam) {
-      //   // Fetch family name for each animal first
-      //   animalData = await Promise.all(animalData.map(async (animal: Animal) => {
-      //     const familyName = await fetchFamily(animal.family);
-      //     return { ...animal, family: familyName };
-      //   }));
-        
-      //   // Then filter with the resolved family names
-      //   animalData = animalData.filter((animal: Animal) => 
-      //     animal.family.toLowerCase() === familyParam.toLowerCase()
-      //   );
-      // } else {
-      //   // Fetch family name for each animal
-      //   animalData = await Promise.all(animalData.map(async (animal: Animal) => {
-      //     const familyName = await fetchFamily(animal.family);
-      //     return { ...animal, family: familyName };
-      //   }));
-      // }
+      let animalData = response.data['member'] || [];
+
+      //Set family name on animal objects
+      animalData = await Promise.all(animalData.map(async (animal: Animal) => {
+        const familyName = await fetchFamily(animal.family);
+        return { ...animal, family: familyName };
+      }));
+
       setAnimals(animalData);
       setError(null);
     } catch (err) {
@@ -169,7 +156,7 @@ const Home: React.FC = () => {
                 <CardDescription>{animal.description}</CardDescription>
                 {!familyParam && 
                     <p className="text-sm text-muted-foreground mt-2">
-                        Family: {}
+                        Family: {animal.family}
                     </p>
                 }
               </CardContent>
