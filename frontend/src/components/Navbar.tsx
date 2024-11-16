@@ -70,7 +70,7 @@ const Navbar: React.FC = () => {
 
                         <div className="flex items-center">
                             <Button variant="outline" size="default">
-                                Connect
+                                Connect (Admin)
                             </Button>
                         </div>
                     </div>

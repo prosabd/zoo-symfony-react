@@ -21,7 +21,9 @@
       "@/ui/*": ["./src/components/ui/*"],
       "@/hooks/*": ["./src/hooks/*"],
       "@/assets/*": ["./src/assets/*"],
-      "@/pages/*": ["./src/pages/*"]
+      "@/pages/*": ["./src/pages/*"],
+      "@/models/*": ["./src/models/*"],
+      "@/public/*": ["./public/*"]
     }
   },
   "include": ["./src/**/*"],

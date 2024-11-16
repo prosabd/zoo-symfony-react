@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { fetchFamilyByUrl } from "@/hooks/fetchFamily";
 import { Button } from "@/components/ui/button";
-
-interface Family {
-  id: number;
-  name: string;
-}
-
-interface Animal {
-  id: number;
-  name: string;
-  description: string;
-  family: string;
-}
+import { Animal } from "@/models/Animal";
+import { Family } from "@/models/Family";
 
 const Home: React.FC = () => {
     // Browser settings part
@@ -61,7 +52,7 @@ const Home: React.FC = () => {
 
       //Set family name on animal objects
       animalData = await Promise.all(animalData.map(async (animal: Animal) => {
-        const familyName = await fetchFamily(animal.family);
+        const familyName = await fetchFamilyByUrl(animal.family).finally(() => {setLoading(false);});
         return { ...animal, family: familyName };
       }));
 
@@ -76,33 +67,6 @@ const Home: React.FC = () => {
       setLoading(false);
     }
   };
-
-  const fetchFamily = async (familyUrl: string): Promise<string> => {
-    const controller = new AbortController();
-    try {
-        // Extract ID from URL (e.g., "/api/families/2" -> "2")
-        const familyId = familyUrl.split('/').pop();
-        
-        if (!familyId) {
-        throw new Error('Invalid family URL');
-        }
-
-        const response = await axios.get<Family>(
-        `http://localhost:8000/api/families/${familyId}`, 
-        { signal: controller.signal }
-        );
-
-        return response.data.name;
-    } catch (err) {
-        if (!axios.isCancel(err)) {
-        console.error('Failed to fetch family:', err);
-        throw err;
-        }
-        return '';
-    } finally {
-        setLoading(false);
-    }
-    };
 
   const handleNextPage = async () => {
     const nextPage = page + 1;
@@ -142,25 +106,27 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* // Sort element by name (or order value selected) and display them */}
           {Array.isArray(animals) && animals.sort((a, b) => order === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)).map(animal => (
-            <Card key={animal.id} className="overflow-hidden">
-              <CardHeader className="p-0">
-                <img 
-                  // Let's check if the item is a basic item and its photo exists on the server, or if it is a user-created item and its photo exists in the public/user_assets/animals_images folder           
-                  src={"https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" + (animal.name).replace(' ', '_') + ".jpg" ? "https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" + (animal.name).replace(' ', '_') + ".jpg" : "@/public/user_assets/animals_images/" + (animal.name).replace(' ', '_') + ".{" + ['jpg', 'png', 'jpeg'].join('|') + "}" }
-                  alt={animal.name}
-                  className="w-full h-48 object-cover"
-                />
-              </CardHeader>
-              <CardContent className="p-4">
-                <CardTitle className="text-xl mb-2">{animal.name}</CardTitle>
-                <CardDescription>{animal.description}</CardDescription>
-                {!familyParam && 
-                    <p className="text-sm text-muted-foreground mt-2">
-                        Family: {animal.family}
-                    </p>
-                }
-              </CardContent>
-            </Card>
+            <Link key={animal.id} to={`/animals/detail/${animal.id}`}>
+              <Card key={animal.id} className="overflow-hidden">
+                <CardHeader className="p-0">
+                  <img 
+                    // Let's check if the item is a basic item and its photo exists on the server, or if it is a user-created item and its photo exists in the public/user_assets/animals_images folder           
+                    src={"https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" + (animal.name).replace(' ', '_') + ".jpg" ? "https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" + (animal.name).replace(' ', '_') + ".jpg" : "@/public/user_assets/animals_images/" + (animal.name).replace(' ', '_') + ".{" + ['jpg', 'png', 'jpeg'].join('|') + "}" }
+                    alt={animal.name}
+                    className="w-full h-48 object-cover"
+                  />
+                </CardHeader>
+                <CardContent className="p-4">
+                  <CardTitle className="text-xl mb-2">{animal.name}</CardTitle>
+                  <CardDescription>{animal.description}</CardDescription>
+                  {!familyParam && 
+                      <p className="text-sm text-muted-foreground mt-2">
+                          Family: {animal.family}
+                      </p>
+                  }
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
           <Button className="mt-4 mx-2 " onClick={handlePreviousPage} disabled={page <= 1}> 

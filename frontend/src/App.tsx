@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from "@/components/Navbar";
 import Home from "@/pages/Home";
 import Animals from "@/pages/Animals";
+import AnimalDetail from "@/pages/AnimalDetail";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/animals">
             <Route index element={<Animals />} /> {/* Shows all animals */}
             <Route path=":family" element={<Animals />} /> {/* Shows animals by type */}
+            <Route path="detail/:id" element={<AnimalDetail />} /> {/* Shows animal details */}
           </Route>
           <Route path="*" element={<NotFound />} /> {/* Catch all unmatched routes */}
         </Routes>
