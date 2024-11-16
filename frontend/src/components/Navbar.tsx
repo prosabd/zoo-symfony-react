@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            <DropdownMenu>
+                            {/* <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button  className="flex items-center gap-2">
                                         About <ChevronDown className="h-4 w-4" />
@@ -65,13 +65,15 @@ const Navbar: React.FC = () => {
                                     <DropdownMenuItem>Team</DropdownMenuItem>
                                     <DropdownMenuItem>Contact</DropdownMenuItem>
                                 </DropdownMenuContent>
-                            </DropdownMenu>
+                            </DropdownMenu> */}
                         </div>
 
                         <div className="flex items-center">
-                            <Button variant="outline" size="default">
-                                Connect (Admin)
-                            </Button>
+                            <Link to="/login">
+                                <Button variant="outline" size="default">
+                                    Connect (Admin)
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

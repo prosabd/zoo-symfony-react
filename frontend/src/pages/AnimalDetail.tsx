@@ -46,7 +46,7 @@ const AnimalDetail: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <Button variant="outline" onClick={() => navigate(-1) ?? navigate("/animals")} className="mb-4">
+      <Button variant="outline" onClick={() => navigate("/animals")} className="mb-4">
         Back to Animals
       </Button>
       <Card className="overflow-hidden">
