@@ -35,26 +35,49 @@ const Home: React.FC = () => {
     const controller = new AbortController();
     try {
       setLoading(true);
-      const response = await axios.get<Animal[]>(`http://localhost:8000/api/animals?page=${pageNumber}`, {
+      // Fetch family details by name to render all animals or filtered by family
+      let url;
+      if (familyParam) {
+        // Fetch family details by name
+        const familyResponse = await axios.get<Family[]>(`http://localhost:8000/api/families`);
+        // console.log(familyResponse.data);
+        const family = familyResponse.data.member.filter(family => family.name === familyParam);
+        // console.log(family[0].id);
+        if (!family) throw new Error("Family not found");
+
+        // Fetch animals with the family ID
+        url = `http://localhost:8000/api/animals?family=/api/families/${family[0].id}&page=${pageNumber}`;
+      } else {
+        // Fetch animals without filtering by family
+        url = `http://localhost:8000/api/animals?page=${pageNumber}`;
+      }
+
+      const response = await axios.get<Animal[]>(url, {
         signal: controller.signal,
       });
       console.log(response);
       setResponse(response);
-      let animalData = response.data['member'] || [];
+      const animalData = response.data['member'] || [];
       
-      // Filter by family if family parameter exists
-      if (familyParam) {
-        animalData = animalData.filter(async (animal: Animal) => {
-            const familyName = await fetchFamily(animal.family);
-            return familyName.toLowerCase() === familyParam.toLowerCase();
-          });
-      } else {
-        // Fetch family name for each animal
-        animalData = await Promise.all(animalData.map(async (animal: Animal) => {
-          const familyName = await fetchFamily(animal.family);
-          return { ...animal, family: familyName };
-        }));
-      }
+      // // Filter by family if family parameter exists
+      // if (familyParam) {
+      //   // Fetch family name for each animal first
+      //   animalData = await Promise.all(animalData.map(async (animal: Animal) => {
+      //     const familyName = await fetchFamily(animal.family);
+      //     return { ...animal, family: familyName };
+      //   }));
+        
+      //   // Then filter with the resolved family names
+      //   animalData = animalData.filter((animal: Animal) => 
+      //     animal.family.toLowerCase() === familyParam.toLowerCase()
+      //   );
+      // } else {
+      //   // Fetch family name for each animal
+      //   animalData = await Promise.all(animalData.map(async (animal: Animal) => {
+      //     const familyName = await fetchFamily(animal.family);
+      //     return { ...animal, family: familyName };
+      //   }));
+      // }
       setAnimals(animalData);
       setError(null);
     } catch (err) {
@@ -117,7 +140,7 @@ const Home: React.FC = () => {
   return (
     <>
       <div className="container mx-auto p-4 text-center">
-          <div className="w-48 mx-auto p-4">
+          <div className="w-48 mx-auto p-4 pt-1">
             <Label htmlFor="order">Order</Label>
             <Select onValueChange={setOrder} defaultValue={order}>
               <SelectTrigger className="w-full">
@@ -146,7 +169,7 @@ const Home: React.FC = () => {
                 <CardDescription>{animal.description}</CardDescription>
                 {!familyParam && 
                     <p className="text-sm text-muted-foreground mt-2">
-                        Family: {animal.family}
+                        Family: {}
                     </p>
                 }
               </CardContent>
@@ -158,7 +181,7 @@ const Home: React.FC = () => {
           </Button>
           <Button className="mt-4 mx-2" onClick={handleNextPage} 
                   //verify if the current page is the last page, if it is, disable the next button
-                  disabled={response?.data?.view?.['@id'] === response?.data?.view?.last}> 
+                  disabled={response?.data?.view?.last ? response?.data?.view?.['@id'] === response?.data?.view?.last : true}> 
             Next Page
           </Button>
       </div>
