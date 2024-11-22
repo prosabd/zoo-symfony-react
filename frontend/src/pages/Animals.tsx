@@ -1,20 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
+import {
+  useParams,
+  useSearchParams,
+  useNavigate,
+  Link,
+} from "react-router-dom";
 import axios from "axios";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchFamilyByUrl } from "@/hooks/fetchFamily";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { fetchFamilyByUrl } from "@/utils/fetchFamily";
 import { Button } from "@/components/ui/button";
 import { Animal } from "@/models/Animal";
 import { Family } from "@/models/Family";
 
 const Home: React.FC = () => {
-    // Browser settings part
+  // Browser settings part
   const { family: familyParam } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const page = parseInt(searchParams.get('page') || '1');
+  const page = parseInt(searchParams.get("page") || "1");
   // Page part
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,9 +47,13 @@ const Home: React.FC = () => {
       let url;
       if (familyParam) {
         // Fetch family details by name
-        const familyResponse = await axios.get<Family[]>(`http://localhost:8000/api/families`);
+        const familyResponse = await axios.get<Family[]>(
+          `http://localhost:8000/api/families`
+        );
         // console.log(familyResponse.data);
-        const family = familyResponse.data.member.filter(family => family.name === familyParam);
+        const family = familyResponse.data.member.filter(
+          (family) => family.name === familyParam
+        );
         // console.log(family[0].id);
         if (!family) throw new Error("Family not found");
 
@@ -48,13 +69,19 @@ const Home: React.FC = () => {
       });
       console.log(response);
       setResponse(response);
-      let animalData = response.data['member'] || [];
+      let animalData = response.data["member"] || [];
 
       //Set family name on animal objects
-      animalData = await Promise.all(animalData.map(async (animal: Animal) => {
-        const familyName = await fetchFamilyByUrl(animal.family).finally(() => {setLoading(false);});
-        return { ...animal, family: familyName };
-      }));
+      animalData = await Promise.all(
+        animalData.map(async (animal: Animal) => {
+          const familyName = await fetchFamilyByUrl(animal.family).finally(
+            () => {
+              setLoading(false);
+            }
+          );
+          return { ...animal, family: familyName };
+        })
+      );
 
       setAnimals(animalData);
       setError(null);
@@ -70,13 +97,13 @@ const Home: React.FC = () => {
 
   const handleNextPage = async () => {
     const nextPage = page + 1;
-    const baseUrl = familyParam ? `/animals/${familyParam}` : '/animals';
+    const baseUrl = familyParam ? `/animals/${familyParam}` : "/animals";
     navigate(`${baseUrl}?page=${nextPage}`);
   };
 
   const handlePreviousPage = async () => {
     const previousPage = page - 1;
-    const baseUrl = familyParam ? `/animals/${familyParam}` : '/animals';
+    const baseUrl = familyParam ? `/animals/${familyParam}` : "/animals";
     navigate(`${baseUrl}?page=${previousPage}`);
   };
 
@@ -91,52 +118,84 @@ const Home: React.FC = () => {
   return (
     <>
       <div className="container mx-auto p-4 text-center">
-          <div className="w-48 mx-auto p-4 pt-1">
-            <Label htmlFor="order">Order</Label>
-            <Select onValueChange={setOrder} defaultValue={order}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Order" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="asc">Ascending</SelectItem>
-                <SelectItem value="desc">Descending</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="w-48 mx-auto p-4 pt-1">
+          <Label htmlFor="order">Order</Label>
+          <Select onValueChange={setOrder} defaultValue={order}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Order" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Ascending</SelectItem>
+              <SelectItem value="desc">Descending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* // Sort element by name (or order value selected) and display them */}
-          {Array.isArray(animals) && animals.sort((a, b) => order === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)).map(animal => (
-            <Link key={animal.id} to={`/animals/detail/${animal.id}`}>
-              <Card key={animal.id} className="overflow-hidden">
-                <CardHeader className="p-0">
-                  <img 
-                    // Let's check if the item is a basic item and its photo exists on the server, or if it is a user-created item and its photo exists in the public/user_assets/animals_images folder           
-                    src={"https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" + (animal.name).replace(' ', '_') + ".jpg" ? "https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" + (animal.name).replace(' ', '_') + ".jpg" : "@/public/user_assets/animals_images/" + (animal.name).replace(' ', '_') + ".{" + ['jpg', 'png', 'jpeg'].join('|') + "}" }
-                    alt={animal.name}
-                    className="w-full h-48 object-cover"
-                  />
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-xl mb-2">{animal.name}</CardTitle>
-                  <CardDescription>{animal.description}</CardDescription>
-                  {!familyParam && 
-                      <p className="text-sm text-muted-foreground mt-2">
+          {Array.isArray(animals) &&
+            animals
+              .sort((a, b) =>
+                order === "asc"
+                  ? a.name.localeCompare(b.name)
+                  : b.name.localeCompare(a.name)
+              )
+              .map((animal) => (
+                <Link key={animal.id} to={`/animals/detail/${animal.id}`}>
+                  <Card key={animal.id} className="overflow-hidden">
+                    <CardHeader className="p-0">
+                      <img
+                        // Let's check if the item is a basic item and its photo exists on the server, or if it is a user-created item and its photo exists in the public/user_assets/animals_images folder
+                        src={
+                          "https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" +
+                          animal.name.replace(" ", "_") +
+                          ".jpg"
+                            ? "https://github.com/prosabd/zoo-symfony-react/releases/download/0.0.0/" +
+                              animal.name.replace(" ", "_") +
+                              ".jpg"
+                            : "@/public/user_assets/animals_images/" +
+                              animal.name.replace(" ", "_") +
+                              ".{" +
+                              ["jpg", "png", "jpeg"].join("|") +
+                              "}"
+                        }
+                        alt={animal.name}
+                        className="w-full h-48 object-cover"
+                      />
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <CardTitle className="text-xl mb-2">
+                        {animal.name}
+                      </CardTitle>
+                      <CardDescription>{animal.description}</CardDescription>
+                      {!familyParam && (
+                        <p className="text-sm text-muted-foreground mt-2">
                           Family: {animal.family}
-                      </p>
-                  }
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
         </div>
-          <Button className="mt-4 mx-2 " onClick={handlePreviousPage} disabled={page <= 1}> 
-            Previous Page
-          </Button>
-          <Button className="mt-4 mx-2" onClick={handleNextPage} 
-                  //verify if the current page is the last page, if it is, disable the next button
-                  disabled={response?.data?.view?.last ? response?.data?.view?.['@id'] === response?.data?.view?.last : true}> 
-            Next Page
-          </Button>
+        <Button
+          className="mt-4 mx-2 "
+          onClick={handlePreviousPage}
+          disabled={page <= 1}
+        >
+          Previous Page
+        </Button>
+        <Button
+          className="mt-4 mx-2"
+          onClick={handleNextPage}
+          //verify if the current page is the last page, if it is, disable the next button
+          disabled={
+            response?.data?.view?.last
+              ? response?.data?.view?.["@id"] === response?.data?.view?.last
+              : true
+          }
+        >
+          Next Page
+        </Button>
       </div>
     </>
   );

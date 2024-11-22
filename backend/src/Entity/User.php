@@ -12,6 +12,12 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource]
+// #[ApiResource(
+//     security: "is_granted('ROLE_ADMIN')",
+//     normalizationContext: ['groups' => ['user:read']],
+//     denormalizationContext: ['groups' => ['user:write']]
+// )]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -23,43 +29,43 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $username = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $mail = null;
+    #[ORM\Column(length: 255, unique: true, nullable: false)]
+    private ?string $email;
 
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private ?string $password;
 
     #[ORM\Column]
-    private ?bool $is_admin = null;
+    private ?bool $is_admin = true;
 
-    #[ORM\Column(type: Types::ARRAY, nullable: false)]
-    private ?array $roles;
+    #[ORM\Column(type: Types::JSON)]
+    private array $roles = [];
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUsername(): ?string
+    public function getCustomUsername(): ?string
     {
         return $this->username;
     }
 
-    public function setUsername(string $username): static
+    public function setCustomUsername(string $username): static
     {
         $this->username = $username;
 
         return $this;
     }
 
-    public function getMail(): ?string
+    public function getEmail(): ?string
     {
-        return $this->mail;
+        return $this->email;
     }
 
-    public function setMail(string $mail): static
+    public function setEmail(string $email): static
     {
-        $this->mail = $mail;
+        $this->email = $email;
 
         return $this;
     }
@@ -90,15 +96,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles;
+        return array_unique($roles);
     }
 
-    public function setRole(?array $role): static
+    public function setRoles(array $roles): static
     {
-        $this->roles[] = $role;
-
+        $this->roles = array_unique($roles);
         return $this;
     }
+
+    public function addRole(string $role): static
+    {
+        if (!in_array($role, $this->roles)) {
+            $this->roles[] = $role;
+        }
+        return $this;
+    }
+
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
@@ -107,6 +122,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return (string) $this->id;
+        return (string) $this->email;
     }
 }

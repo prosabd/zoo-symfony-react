@@ -7,3 +7,8 @@ controllers:
 api_login_check:
     path: /api/login_check
     methods: ['POST']
+
+# api_platform:
+#     resource: .
+#     type: api_platform
+#     prefix: /api

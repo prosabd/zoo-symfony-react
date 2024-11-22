@@ -2,31 +2,41 @@ security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        # legacy:
+        #     algorithm: sha256
+        #     encode_as_base64: false
+        #     iterations: 1
+        App\Entity\User:
+            algorithm: auto
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        login:
-            pattern: ^/api/login$
-            stateless: true
-            json_login:
-                check_path: /api/login_check
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-            custom_authenticator: App\Security\UsersAuthenticator
-            security: false
         api:
             pattern:   ^/api
             stateless: true
+            provider: app_user_provider
             jwt: ~
         main:
-            lazy: true
-            provider: users_in_memory
+            # lazy: true
+            # provider: users_in_memory
+
+            provider: app_user_provider
+            stateless: true
+            json_login:
+                username_path: email
+                password_path: password
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -37,12 +47,19 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        # Login & Documentation
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: ROLE_ADMIN }
-        - { path: ^/api/users, roles: iROLE_ADMIN }
-        - { path: ^/api/, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: PUBLIC_ACCESS }
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }  # Swagger UI
+        - { path: ^/$, roles: PUBLIC_ACCESS }      # API Platform entry
+
+        # Users management
+        - { path: ^/api/users, methods: [GET, POST, PUT, PATCH, DELETE], roles: ROLE_ADMIN }  # Admin only for modifications
+        - { path: ^/api/users/\d+, methods: [GET], roles: IS_AUTHENTICATED_FULLY }  # Only authenticated users can view specific user details
+
+        # General API access
+        - { path: ^/api/, methods: [GET], roles: PUBLIC_ACCESS }  # Public access to view resources
+        - { path: ^/api/, methods: [POST, PUT, PATCH, DELETE], roles: IS_AUTHENTICATED_FULLY }  # Require auth for modifications
+
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
@@ -57,3 +74,9 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+
+when@dev:
+    security:
+        firewalls:
+            api:
+                # security: false  # This disables security checks for the entire /api path in dev environment

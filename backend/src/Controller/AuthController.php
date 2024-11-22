@@ -4,12 +4,12 @@ namespace App\Controller;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 class AuthController extends AbstractController
@@ -17,7 +17,7 @@ class AuthController extends AbstractController
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher,
-        private JWTTokenManagerInterface $JWTManager
+        private JWTTokenManagerInterface $JWTManager,
     ) {}
 
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
@@ -45,6 +45,8 @@ class AuthController extends AbstractController
         // Create new user
         $user = new User();
         $user->setEmail($data['email']);
+        // Get username or the content before @ on the mail
+        $user->setCustomUsername($data['username'] ?? explode('@', $data['email'], )[0]);
         
         // Hash password
         $hashedPassword = $this->passwordHasher->hashPassword(
@@ -52,7 +54,9 @@ class AuthController extends AbstractController
             $data['password']
         );
         $user->setPassword($hashedPassword);
-        
+
+        $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+
         // Save user
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -80,7 +84,7 @@ class AuthController extends AbstractController
 
         if (!$user) {
             return $this->json([
-                'message' => 'Invalid credentials'
+                'message' => 'Invalid credentials, account not found'
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -98,7 +102,8 @@ class AuthController extends AbstractController
             'token' => $token,
             'user' => [
                 'id' => $user->getId(),
-                'email' => $user->getEmail()
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(), 
             ]
         ]);
     }
