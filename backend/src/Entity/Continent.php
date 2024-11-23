@@ -8,9 +8,13 @@ use App\Repository\ContinentRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: ContinentRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read'], 'enable_max_depth' => true],
+    denormalizationContext: ['groups' => ['write'], 'enable_max_depth' => true]
+)]
 class Continent
 {
     #[ORM\Id]
@@ -21,12 +25,15 @@ class Continent
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['read', 'write'])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Animal>
      */
     #[ORM\ManyToMany(targetEntity: Animal::class, mappedBy: 'continents')]
+    #[Groups(['read', 'write'])]
+    #[MaxDepth(1)]
     private Collection $animals;
 
     public function __construct()

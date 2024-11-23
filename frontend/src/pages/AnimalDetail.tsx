@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fetchFamilyByUrl } from "@/utils/fetchFamily";
 import { Animal } from "@/models/Animal";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AnimalDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,14 +17,11 @@ const AnimalDetail: React.FC = () => {
     const controller = new AbortController();
     try {
       setLoading(true);
-      const response = await axios.get<Animal>(
-        `http://localhost:8000/api/animals/${id}`,
-        {
-          signal: controller.signal,
-        }
-      );
+      const response = await axios.get<Animal>(API_URL + `/animals/${id}`, {
+        signal: controller.signal,
+      });
       //Set family name on animal objects
-      const familyName = await fetchFamilyByUrl(response.data.family);
+      const familyName = response.data.family.name;
       const animalData = { ...response.data, family: familyName };
       setAnimal(animalData);
       setError(null);

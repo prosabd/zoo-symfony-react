@@ -1,30 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  useParams,
-  useSearchParams,
-  useNavigate,
-  Link,
-} from "react-router-dom";
+import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { fetchFamilyByUrl } from "@/utils/fetchFamily";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Animal } from "@/models/Animal";
 import { Family } from "@/models/Family";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Home: React.FC = () => {
   // Browser settings part
@@ -47,21 +30,21 @@ const Home: React.FC = () => {
       let url;
       if (familyParam) {
         // Fetch family details by name
-        const familyResponse = await axios.get<Family[]>(
-          `http://localhost:8000/api/families`
-        );
+        const familyResponse = await axios.get<Family[]>(API_URL + `/families`);
         // console.log(familyResponse.data);
-        const family = familyResponse.data.member.filter(
+        const family = familyResponse.data["hydra:member"].filter(
           (family) => family.name === familyParam
         );
         // console.log(family[0].id);
         if (!family) throw new Error("Family not found");
 
         // Fetch animals with the family ID
-        url = `http://localhost:8000/api/animals?family=/api/families/${family[0].id}&page=${pageNumber}`;
+        url =
+          API_URL +
+          `/animals?family=/api/families/${family[0].id}&page=${pageNumber}`;
       } else {
         // Fetch animals without filtering by family
-        url = `http://localhost:8000/api/animals?page=${pageNumber}`;
+        url = API_URL + `/animals?page=${pageNumber}`;
       }
 
       const response = await axios.get<Animal[]>(url, {
@@ -69,16 +52,12 @@ const Home: React.FC = () => {
       });
       console.log(response);
       setResponse(response);
-      let animalData = response.data["member"] || [];
+      let animalData = response.data["hydra:member"] || [];
 
       //Set family name on animal objects
       animalData = await Promise.all(
         animalData.map(async (animal: Animal) => {
-          const familyName = await fetchFamilyByUrl(animal.family).finally(
-            () => {
-              setLoading(false);
-            }
-          );
+          const familyName = animal.family.name;
           return { ...animal, family: familyName };
         })
       );
@@ -87,7 +66,7 @@ const Home: React.FC = () => {
       setError(null);
     } catch (err) {
       if (!axios.isCancel(err)) {
-        setError("Failed to fetch animals");
+        setError("Failed to fetch " + (familyParam ?? "") + " animals");
         console.error(err);
       }
     } finally {
@@ -189,8 +168,9 @@ const Home: React.FC = () => {
           onClick={handleNextPage}
           //verify if the current page is the last page, if it is, disable the next button
           disabled={
-            response?.data?.view?.last
-              ? response?.data?.view?.["@id"] === response?.data?.view?.last
+            response?.data?.["hydra:view"]?.["hydra:last"]
+              ? response?.data?.["hydra:view"]?.["@id"] ===
+                response?.data?.["hydra:view"]?.["hydra:last"]
               : true
           }
         >

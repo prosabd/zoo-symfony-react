@@ -6,6 +6,7 @@ import Home from "@/pages/Home";
 import Animals from "@/pages/Animals";
 import AnimalDetail from "@/pages/AnimalDetail";
 import Login from "@/pages/Admin/Login";
+import AdminDashboard from "@/pages/Admin/Dashboard";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -22,6 +23,10 @@ function App() {
             <Route path="detail/:id" element={<AnimalDetail />} /> {/* Shows animal details */}
           </Route>
           <Route path="/login" element={<Login />} />
+          <Route path="/admin">
+            <Route index element={<AdminDashboard />} /> {/* redirect to admin dashboard */}
+            <Route path="dashboard" element={<AdminDashboard />} /> {/* Shows admin dashboard */}
+          </Route>
           <Route path="*" element={<NotFound />} /> {/* Catch all unmatched routes */}
         </Routes>
       </div>

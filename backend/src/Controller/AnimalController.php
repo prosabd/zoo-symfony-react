@@ -12,16 +12,22 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-// #[Route('/animal')]
+#[Route('/animal')]
 final class AnimalController extends AbstractController
 {
-    #[Route('/animals', name: 'app_animal_index', methods: ['GET'])]
-    public function getAnimals(AnimalRepository $animalRepository, Request $request): JsonResponse
+    #[Route(name: 'app_animal_index', methods: ['GET'])]
+    public function index(): Response
     {
-        $datas = json_decode($request->getContent(), true );
-        $animals = $animalRepository->findAll();
-        
+        return $this->redirect('/api#/Animal/api_animals_get_collection');
     }
+
+    // #[Route('/animals', name: 'app_animal_index', methods: ['GET'])]
+    // public function getAnimals(AnimalRepository $animalRepository, Request $request): JsonResponse
+    // {
+    //     $datas = json_decode($request->getContent(), true );
+    //     $animals = $animalRepository->findAll();
+        
+    // }
     // #[Route(name: 'app_animal_index', methods: ['GET'])]
     // public function index(AnimalRepository $animalRepository): Response
     // {

@@ -25,19 +25,23 @@ class Animal
     private ?int $id = null;
     
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['read', 'write'])]
     private ?string $name = null;
-
+    
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['read', 'write'])]
     private ?string $description = null;
-
+    
     #[ORM\ManyToOne(inversedBy: 'animal')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['read', 'write'])]
     private ?Family $family = null;
-
+    
     /**
      * @var Collection<int, Continent>
      */
     #[ORM\ManyToMany(targetEntity: Continent::class, inversedBy: 'animals')]
+    #[Groups(['read', 'write'])]
     private Collection $continents;
 
     public function __construct()

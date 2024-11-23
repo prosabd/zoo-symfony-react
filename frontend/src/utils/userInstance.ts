@@ -1,10 +1,11 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
+const API_URL = import.meta.env.VITE_API_URL;
 
-// Create an Axios instance with a base URL and other configurations if needed
+// Create an Axios instance with a base URL 
 
 const instance: AxiosInstance = axios.create({
-    baseURL: 'http://localhost:8000',
+    baseURL: API_URL,
 });
 
 // Add JWT token to requests

@@ -50,9 +50,10 @@ security:
         # Login & Documentation
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }  # Swagger UI
-        - { path: ^/$, roles: PUBLIC_ACCESS }      # API Platform entry
+        - { path: ^/api$, roles: PUBLIC_ACCESS }      # API Platform entry
 
         # Users management
+        - { path: ^/api/admin/, roles: ROLE_ADMIN } # Admin pages access
         - { path: ^/api/users, methods: [GET, POST, PUT, PATCH, DELETE], roles: ROLE_ADMIN }  # Admin only for modifications
         - { path: ^/api/users/\d+, methods: [GET], roles: IS_AUTHENTICATED_FULLY }  # Only authenticated users can view specific user details
 
