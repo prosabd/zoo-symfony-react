@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import instance, { verifyToken } from "@/utils/userInstance";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,31 +13,24 @@ import { User } from "@/models/User";
 import { Animal } from "@/models/Animal";
 import { Family } from "@/models/Family";
 import { Continent } from "@/models/Continent";
-import instance from "@/utils/userInstance";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
   const [continents, setContinents] = useState<Continent[]>([]);
-  const navigate = useNavigate();
-  const token = Cookies.get('token');
   
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!verifyToken()){
+        navigate('/login');
+    };
     const fetchData = async () => {
       try {
         const [usersRes, animalsRes, familiesRes, continentsRes] = await Promise.all([
-          instance.get('/users', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }),
+          instance.get('/users'),
           instance.get('/animals'),
           instance.get('/families'),
           instance.get('/continents')

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { verifyToken } from "@/utils/userInstance";
 import { login } from "@/utils/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,10 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorLogin, setErrorLogin] = useState("");
   const navigate = useNavigate();
-  const token = Cookies.get('token');
 
   useEffect(() => {
     // Check if the user is already logged in
-    if (token) {
+    if (verifyToken()) {
         navigate("/admin/dashboard");
         return;
     }
@@ -27,12 +27,13 @@ const LoginPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-        const response = await login(email, password);
-        Cookies.set('token', response.token); // Store the token in a cookie
-        navigate("/admin/dashboard"); // Redirect to dashboard after successful login
+            const response = await login(email, password);
+            Cookies.set('token', response.token); // Store the token in a cookie
+            console.log("Login successful:", Cookies.get('token'));
+            navigate("/admin/dashboard"); // Redirect to dashboard after successful login
         } catch (error) {
-        console.error("Error during login:", error);
-        setErrorLogin("Invalid email or password");
+            console.error("Error during login:", error);
+            setErrorLogin("Invalid email or password");
         }
     };
 
