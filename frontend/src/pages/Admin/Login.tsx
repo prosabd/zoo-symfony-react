@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import { login } from "@/utils/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,20 +14,30 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorLogin, setErrorLogin] = useState("");
   const navigate = useNavigate();
+  const token = Cookies.get('token');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login(email, password);
-      navigate("/admin/dashboard"); // Redirect to dashboard after successful login
-    } catch (error) {
-      console.error("Error during login:", error);
-      setErrorLogin("Invalid email or password");
+  useEffect(() => {
+    // Check if the user is already logged in
+    if (token) {
+        navigate("/admin/dashboard");
+        return;
     }
-  };
+  });
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+        const response = await login(email, password);
+        Cookies.set('token', response.token); // Store the token in a cookie
+        navigate("/admin/dashboard"); // Redirect to dashboard after successful login
+        } catch (error) {
+        console.error("Error during login:", error);
+        setErrorLogin("Invalid email or password");
+        }
+    };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex mt-20 items-center justify-center">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Admin Login</CardTitle>

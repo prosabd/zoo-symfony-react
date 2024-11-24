@@ -12,11 +12,11 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource]
-// #[ApiResource(
-//     security: "is_granted('ROLE_ADMIN')",
-//     normalizationContext: ['groups' => ['user:read']],
-//     denormalizationContext: ['groups' => ['user:write']]
-// )]
+#[ApiResource(
+    security: "is_granted('ROLE_ADMIN')",
+    normalizationContext: ['groups' => ['read'], 'enable_max_depth' => true],
+    denormalizationContext: ['groups' => ['write'], 'enable_max_depth' => true]
+)]
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -25,20 +25,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     #[Groups(['read'])]  // Only readable, not writable
     private ?int $id = null;
-
+    
     #[ORM\Column(length: 255)]
+    #[Groups(['read', 'write'])]  // Only readable, not writable
     private ?string $username = null;
-
+    
     #[ORM\Column(length: 255, unique: true, nullable: false)]
+    #[Groups(['read'])]  // Only readable, not writable
     private ?string $email;
-
+    
     #[ORM\Column(length: 255, nullable: false)]
+    #[Groups(['read', 'write'])]  // Only readable, not writable
     private ?string $password;
-
+    
     #[ORM\Column]
+    #[Groups(['read', 'write'])]  // Only readable, not writable
     private ?bool $is_admin = true;
-
+    
     #[ORM\Column(type: Types::JSON)]
+    #[Groups(['read', 'write'])]  // Only readable, not writable
     private array $roles = [];
 
     public function getId(): ?int

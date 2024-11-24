@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,43 +10,51 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { User } from "@/models/User";
+import { Animal } from "@/models/Animal";
+import { Family } from "@/models/Family";
+import { Continent } from "@/models/Continent";
+import instance from "@/utils/userInstance";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
   const [continents, setContinents] = useState<Continent[]>([]);
-
+  const navigate = useNavigate();
+  const token = Cookies.get('token');
+  
   useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await fetch("/api/users");
-      const data = await response.json();
-      setUsers(data);
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    const fetchData = async () => {
+      try {
+        const [usersRes, animalsRes, familiesRes, continentsRes] = await Promise.all([
+          instance.get('/users', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }),
+          instance.get('/animals'),
+          instance.get('/families'),
+          instance.get('/continents')
+        ]);
+
+        setUsers(usersRes.data);
+        setAnimals(animalsRes.data);
+        setFamilies(familiesRes.data);
+        setContinents(continentsRes.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
 
-    const fetchAnimals = async () => {
-      const response = await fetch("/api/animals");
-      const data = await response.json();
-      setAnimals(data);
-    };
-
-    const fetchFamilies = async () => {
-      const response = await fetch("/api/families");
-      const data = await response.json();
-      setFamilies(data);
-    };
-
-    const fetchContinents = async () => {
-      const response = await fetch("/api/continents");
-      const data = await response.json();
-      setContinents(data);
-    };
-
-    fetchUsers();
-    fetchAnimals();
-    fetchFamilies();
-    fetchContinents();
-  }, []);
+    fetchData();
+  });
 
   return (
     <div className="p-4 space-y-4 flex flex-row gap-4 justify-between">
