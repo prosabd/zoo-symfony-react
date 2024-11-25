@@ -5,7 +5,6 @@ import { jwtDecode } from 'jwt-decode';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const token = Cookies.get('token');
-console.log(token);
 
 // Function to verify the token
 export const verifyToken = () => {

@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource]
 #[ApiResource(
     security: "is_granted('ROLE_ADMIN')",
     normalizationContext: ['groups' => ['read'], 'enable_max_depth' => true],
@@ -27,23 +26,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
     
     #[ORM\Column(length: 255)]
-    #[Groups(['read', 'write'])]  // Only readable, not writable
-    private ?string $username = null;
+    #[Groups(['read', 'write'])]
+    private ?string $customUsername = null;
     
     #[ORM\Column(length: 255, unique: true, nullable: false)]
     #[Groups(['read'])]  // Only readable, not writable
     private ?string $email;
     
     #[ORM\Column(length: 255, nullable: false)]
-    #[Groups(['read', 'write'])]  // Only readable, not writable
+    #[Groups(['read', 'write'])]
     private ?string $password;
     
     #[ORM\Column]
-    #[Groups(['read', 'write'])]  // Only readable, not writable
+    #[Groups(['read', 'write'])]
     private ?bool $is_admin = true;
     
     #[ORM\Column(type: Types::JSON)]
-    #[Groups(['read', 'write'])]  // Only readable, not writable
+    #[Groups(['read', 'write'])]
     private array $roles = [];
 
     public function getId(): ?int
@@ -53,12 +52,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getCustomUsername(): ?string
     {
-        return $this->username;
+        return $this->customUsername;
     }
 
     public function setCustomUsername(string $username): static
     {
-        $this->username = $username;
+        $this->customUsername = $username;
 
         return $this;
     }

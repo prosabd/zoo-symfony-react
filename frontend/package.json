@@ -32,7 +32,8 @@
     "build": "tsc -b && vite build --port 3000",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "vite preview --port 3000"
+    "start": "vite preview --port 3000",
+    "scan" : "vite --port 3000 & npx react-scan@latest localhost:3000"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
