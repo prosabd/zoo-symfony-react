@@ -22,17 +22,16 @@ const LoginPage = () => {
         navigate("/admin/dashboard");
         return;
     }
-  });
+  }, [navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const response = await login(email, password);
             Cookies.set('token', response.token); // Store the token in a cookie
-            console.log("Login successful:", Cookies.get('token'));
             navigate("/admin/dashboard"); // Redirect to dashboard after successful login
         } catch (error) {
-            console.error("Error during login:", error);
+            // console.error("Error during login:", error);
             setErrorLogin("Invalid email or password");
         }
     };

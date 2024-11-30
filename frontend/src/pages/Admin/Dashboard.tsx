@@ -45,9 +45,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!verifyToken()){
-        navigate('/login');
-    };
     fetchData();
   }, []);
 
@@ -140,10 +137,11 @@ const AdminDashboard: React.FC = () => {
           {families.map((family) => (
             <div key={family.id} className="flex items-center justify-between py-2">
               <Avatar>
-                  <AvatarImage src={`@/assets/images/families/${family.name.toLowerCase().replace(" ", "_")}.png`}
+                  <AvatarImage src={`@/assets/images/families/${family.name.toLowerCase().replace(" ", "_")}.svg`}
                   />
                   <AvatarFallback>.</AvatarFallback>
               </Avatar>
+              <img src={`../../assets/images/families/insect.svg`} alt={`@/assets/images/families/${family.name.toLowerCase().replace(" ", "_")}.svg`} className="w-10 h-10 rounded-full" />
               <div>
                 <p className="text-sm font-medium leading-none">{family.name}</p>
                 <p className="text-sm text-muted-foreground">

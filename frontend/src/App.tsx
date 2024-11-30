@@ -1,6 +1,7 @@
 import "./App.css";
 import { BrowserRouter } from 'react-router-dom';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { verifyToken } from "@/utils/userInstance";
 import Navbar from "@/components/Navbar";
 import Home from "@/pages/Home";
 import Animals from "@/pages/Animals";
@@ -8,6 +9,10 @@ import AnimalDetail from "@/pages/AnimalDetail";
 import Login from "@/pages/Admin/Login";
 import AdminDashboard from "@/pages/Admin/Dashboard";
 import NotFound from "@/pages/NotFound";
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  return verifyToken() ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
 
@@ -23,10 +28,14 @@ function App() {
             <Route path="detail/:id" element={<AnimalDetail />} /> {/* Shows animal details */}
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="/admin">
-            <Route index element={<AdminDashboard />} /> {/* redirect to admin dashboard */}
-            <Route path="dashboard" element={<AdminDashboard />} /> {/* Shows admin dashboard */}
-          </Route>
+          <Route path="/admin/*" element={
+            <ProtectedRoute>
+              <Routes>
+                <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+              </Routes>
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} /> {/* Catch all unmatched routes */}
         </Routes>
       </div>
