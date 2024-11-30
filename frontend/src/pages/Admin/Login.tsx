@@ -31,7 +31,6 @@ const LoginPage = () => {
             Cookies.set('token', response.token); // Store the token in a cookie
             navigate("/admin/dashboard"); // Redirect to dashboard after successful login
         } catch (error) {
-            // console.error("Error during login:", error);
             setErrorLogin("Invalid email or password");
         }
     };

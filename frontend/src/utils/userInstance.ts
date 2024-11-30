@@ -18,8 +18,6 @@ export const verifyToken = () => {
   }
 
   if (!currentToken || currentToken === '') {
-    // Remove or comment out this log to reduce console noise
-    // console.log('Token not found');
     lastTokenCheck = { token: currentToken || '', isValid: false, checkedAt: currentTime };
     return false;
   }
@@ -29,16 +27,12 @@ export const verifyToken = () => {
     const isTokenValid = decodedToken.exp > currentTime;
 
     if (!isTokenValid) {
-      console.log('Token expired');
       Cookies.remove('token');
-    } else {
-      console.log('Token valid');
     }
     
     lastTokenCheck = { token: currentToken, isValid: isTokenValid, checkedAt: currentTime };
     return isTokenValid;
   } catch (error) {
-    console.error('Error decoding token:', error);
     return false;
   }
 };
