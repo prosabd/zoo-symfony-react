@@ -9,12 +9,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 import User from "@/models/User";
 import Animal from "@/models/Animal";
 import Family from "@/models/Family";
 import Continent from "@/models/Continent";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -44,20 +43,31 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDelete = async (uri: string) => {
+    try {
+      await instance.delete(uri);
+      fetchData();
+    } catch (error) {
+      // error 
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+  if (loading) {
+    return ( 
+        <Button className="flex justify-center items-center" disabled>
+            <Loader2 className="animate-spin" />
+            Please wait
+        </Button>
+    )
+  }
 
   return (
-    <div className="p-4 space-y-4 flex flex-row gap-4 justify-between">
-      <Card className="w-1/3">
+    <div className="p-4 flex flex-row gap-4 justify-between">
+      <Card className="">
         <CardHeader>
           <CardTitle>Users</CardTitle>
         </CardHeader>
@@ -73,11 +83,11 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-sm font-medium leading-none">{user.email}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 m-2">
                 <Button variant="secondary" size="sm">
                   Edit
                 </Button>
-                <Button variant="destructive" size="sm">
+                <Button variant="destructive" size="sm"  onClick={() => handleDelete(user["@id"].replace("/api", ""))}>
                   Delete
                 </Button>
               </div>
@@ -86,7 +96,7 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="w-1/3">
+      <Card className="w-2/5">
         <CardHeader>
           <CardTitle>Animals</CardTitle>
         </CardHeader>
@@ -116,11 +126,11 @@ const AdminDashboard: React.FC = () => {
                   {animal.family.name} - {animal.continents?.map(c => c.name).join(', ').slice(0, 20)}{(animal.continents?.length ?? 0) > 1 ? '...' : ''}
                 </p>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 m-2">
                 <Button variant="secondary" size="sm">
                   Edit
                 </Button>
-                <Button variant="destructive" size="sm">
+                <Button variant="destructive" size="sm"  onClick={() => handleDelete(animal["@id"].replace("/api", ""))}>
                   Delete
                 </Button>
               </div>
@@ -129,30 +139,24 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="w-1/3">
+      <Card className="">
         <CardHeader>
           <CardTitle>Families</CardTitle>
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-96">
           {families.map((family) => (
             <div key={family.id} className="flex items-center justify-between py-2">
-              <Avatar>
-                  <AvatarImage src={`@/assets/images/families/${family.name.toLowerCase().replace(" ", "_")}.svg`}
-                  />
-                  <AvatarFallback>.</AvatarFallback>
-              </Avatar>
-              <img src={`../../assets/images/families/insect.svg`} alt={`@/assets/images/families/${family.name.toLowerCase().replace(" ", "_")}.svg`} className="w-10 h-10 rounded-full" />
               <div>
                 <p className="text-sm font-medium leading-none">{family.name}</p>
                 <p className="text-sm text-muted-foreground">
                   {family.description?.slice(0, 20)}{family.description && family.description.length > 20 ? '...' : ''}
                 </p>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 m-2">
                 <Button variant="secondary" size="sm">
                   Edit
                 </Button>
-                <Button variant="destructive" size="sm">
+                <Button variant="destructive" size="sm"  onClick={() => handleDelete(family["@id"].replace("/api", ""))}>
                   Delete
                 </Button>
               </div>
@@ -161,7 +165,7 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="w-1/3">
+      <Card className="">
         <CardHeader>
           <CardTitle>Continents</CardTitle>
         </CardHeader>
@@ -175,7 +179,7 @@ const AdminDashboard: React.FC = () => {
                 <Button variant="secondary" size="sm">
                   Edit
                 </Button>
-                <Button variant="destructive" size="sm">
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(continent["@id"].replace("/api", ""))}>
                   Delete
                 </Button>
               </div>

@@ -1,11 +1,19 @@
-import React from 'react';
 import '@/assets/styles/components/Navbar.css';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Link } from 'react-router-dom';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { verifyToken, logout} from '@/utils/userInstance';
 
 const Navbar: React.FC = () => {
+    const navigate = useNavigate();
+            
+    const logOut = () => {
+        logout();
+        navigate("/animals");
+      };
+
     return (
         <div className="flex flex-col min-h-10">
             <div className="fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border">
@@ -54,26 +62,27 @@ const Navbar: React.FC = () => {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            {/* <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button  className="flex items-center gap-2">
-                                        About <ChevronDown className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem>Our Story</DropdownMenuItem>
-                                    <DropdownMenuItem>Team</DropdownMenuItem>
-                                    <DropdownMenuItem>Contact</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu> */}
                         </div>
 
                         <div className="flex items-center">
-                            <Link to="/login">
-                                <Button variant="outline" size="default">
-                                    Connect (Admin)
-                                </Button>
-                            </Link>
+                          {verifyToken().isValid ?
+                                (
+                                <div className='flex space-x-3'>
+                                  <Button variant="destructive" size="default" onClick={logOut}>
+                                      Disconnect
+                                  </Button>
+                                  <Button variant="outline" size="default" disabled>
+                                      Hi {verifyToken().username }
+                                  </Button>
+                                </div>
+                             ):(
+                                <Link to="/login">
+                                    <Button variant="outline" size="default">
+                                        Connect (Admin)
+                                    </Button>
+                                </Link>
+                              )
+                            }
                         </div>
                     </div>
                 </div>

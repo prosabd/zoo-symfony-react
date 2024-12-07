@@ -11,7 +11,7 @@ import AdminDashboard from "@/pages/Admin/Dashboard";
 import NotFound from "@/pages/NotFound";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  return verifyToken() ? children : <Navigate to="/login" replace />;
+  return verifyToken().isAdmin ? children : <Navigate to="/login" replace />;
 };
 
 function App() {

@@ -15,24 +15,23 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorLogin, setErrorLogin] = useState("");
   const navigate = useNavigate();
-
+  const { isValid, isAdmin } = verifyToken();
+  
   useEffect(() => {
-    // Check if the user is already logged in
-    if (verifyToken()) {
-        navigate("/admin/dashboard");
-        return;
+    if (isValid) {
+      navigate(isAdmin ? "/admin/dashboard" : "/animals");
     }
   }, [navigate]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const response = await login(email, password);
-            Cookies.set('token', response.token); // Store the token in a cookie
-            navigate("/admin/dashboard"); // Redirect to dashboard after successful login
-        } catch (error) {
-            setErrorLogin("Invalid email or password");
-        }
+  const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+          const response = await login(email, password);
+          Cookies.set('token', response.token); // Store the token in a cookie
+          navigate("/admin/dashboard"); // Redirect to dashboard after successful login
+      } catch (error) {
+          setErrorLogin("Invalid email or password");
+      }
     };
 
   return (

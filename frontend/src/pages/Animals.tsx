@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState("asc");
   const [error, setError] = useState<string | null>(null);
-  const [response, setResponse] = useState<any | null>(null);
+  const [view, setView] = useState<any | null>(null);
 
   const fetchAnimals = async (pageNumber: number) => {
     const controller = new AbortController();
@@ -50,8 +50,7 @@ const Home: React.FC = () => {
       const response = await axios.get<Animal[]>(url, {
         signal: controller.signal,
       });
-      console.log(response);
-      setResponse(response);
+      setView(response.data?.["hydra:view"]);
       let animalData = response.data["hydra:member"] || [];
 
       //Set family name on animal objects
@@ -168,9 +167,9 @@ const Home: React.FC = () => {
           onClick={handleNextPage}
           //verify if the current page is the last page, if it is, disable the next button
           disabled={
-            response?.data?.["hydra:view"]?.["hydra:last"]
-              ? response?.data?.["hydra:view"]?.["@id"] ===
-                response?.data?.["hydra:view"]?.["hydra:last"]
+            view?.["hydra:last"]
+              ? view?.["@id"] ===
+                view?.["hydra:last"]
               : true
           }
         >

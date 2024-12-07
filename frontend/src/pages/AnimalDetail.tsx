@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Animal } from "@/models/Animal";
+import Animal from "@/models/Animal";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const AnimalDetail: React.FC = () => {
