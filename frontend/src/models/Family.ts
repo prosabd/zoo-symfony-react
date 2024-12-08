@@ -5,12 +5,12 @@ export default class Family {
     '@id'?: string;
     '@type'?: string;
     description?: string;
-    animal?: Animal[];
+    animals?: Animal[];
 
     constructor (id: number, name: string, description?: string, animal?: Animal[]) {
         this.id = id;
          this.name = name;
          this.description = description;
-         this.animal = animal;
+         this.animals = animal;
     }
 }

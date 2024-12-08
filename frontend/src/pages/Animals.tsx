@@ -4,9 +4,10 @@ import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Animal } from "@/models/Animal";
-import { Family } from "@/models/Family";
+import Animal from "@/models/Animal";
+import Family from "@/models/Family";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Home: React.FC = () => {
@@ -90,7 +91,14 @@ const Home: React.FC = () => {
     return () => {};
   }, [page, familyParam, order]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return ( 
+        <Button className="flex justify-center items-center" disabled>
+            <Loader2 className="animate-spin" />
+            Please wait
+        </Button>
+    )
+  }
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (

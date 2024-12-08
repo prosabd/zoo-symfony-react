@@ -9,11 +9,12 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import User from "@/models/User";
 import Animal from "@/models/Animal";
 import Family from "@/models/Family";
 import Continent from "@/models/Continent";
+import DashboardForm from "@/components/DashboardForm";
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +23,10 @@ const AdminDashboard: React.FC = () => {
   const [families, setFamilies] = useState<Family[]>([]);
   const [continents, setContinents] = useState<Continent[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [openForm, setOpenForm] = useState(false);
+  const [formType, setFormType] = useState<'users' | 'animals' | 'families' | 'continents'>('users');
+  const [formId, setFormId] = useState<number | undefined>(undefined);
+
   const fetchData = async () => {
     try {
       const [usersRes, animalsRes, familiesRes, continentsRes] = await Promise.all([
@@ -42,6 +46,18 @@ const AdminDashboard: React.FC = () => {
         setLoading(false);
     }
   };
+  
+  const handleAdd = (type: 'users' | 'animals' | 'families' | 'continents') => {
+    setFormType(type);
+    setFormId(undefined);
+    setOpenForm(true);
+  };
+
+  const handleEdit = (type: 'users' | 'animals' | 'families' | 'continents', id: number) => {
+    setFormType(type);
+    setFormId(id);
+    setOpenForm(true);
+  };
 
   const handleDelete = async (uri: string) => {
     try {
@@ -50,6 +66,16 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       // error 
     }
+  };
+
+  const handleFormClose = () => {
+    setOpenForm(false);
+    fetchData();
+  };
+
+  const handleFormSubmit = () => {
+    setOpenForm(false);
+    fetchData();
   };
 
   useEffect(() => {
@@ -72,6 +98,10 @@ const AdminDashboard: React.FC = () => {
           <CardTitle>Users</CardTitle>
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-96">
+          <Button variant="outline" size="sm" onClick={() => handleAdd('users')}className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add
+          </Button>
           {users.map((user) => (
             <div key={user.id} className="flex items-center justify-between py-2">
               <div className="flex items-center space-x-4">
@@ -84,7 +114,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-2 m-2">
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" onClick={() => handleEdit('users', user.id)}>
                   Edit
                 </Button>
                 <Button variant="destructive" size="sm"  onClick={() => handleDelete(user["@id"].replace("/api", ""))}>
@@ -101,6 +131,10 @@ const AdminDashboard: React.FC = () => {
           <CardTitle>Animals</CardTitle>
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-96">
+          <Button variant="outline" size="sm" onClick={() => handleAdd('animals')}className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add
+          </Button>
           {animals.map((animal) => (
             <div key={animal.id} className="flex items-center justify-between py-2">
               <Avatar>
@@ -127,7 +161,7 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
               <div className="flex items-center space-x-2 m-2">
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" onClick={() => handleEdit('animals', animal.id)}>
                   Edit
                 </Button>
                 <Button variant="destructive" size="sm"  onClick={() => handleDelete(animal["@id"].replace("/api", ""))}>
@@ -139,11 +173,24 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
+      {openForm && (
+        <DashboardForm
+          type={formType}
+          id={formId}
+          onClose={handleFormClose}
+          onSubmit={handleFormSubmit}
+        />
+      )}
+
       <Card className="">
         <CardHeader>
           <CardTitle>Families</CardTitle>
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-96">
+          <Button variant="outline" size="sm" onClick={() => handleAdd('families')}className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add
+          </Button>
           {families.map((family) => (
             <div key={family.id} className="flex items-center justify-between py-2">
               <div>
@@ -153,7 +200,7 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
               <div className="flex items-center space-x-2 m-2">
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" onClick={() => handleEdit('families', family.id)}>
                   Edit
                 </Button>
                 <Button variant="destructive" size="sm"  onClick={() => handleDelete(family["@id"].replace("/api", ""))}>
@@ -170,13 +217,17 @@ const AdminDashboard: React.FC = () => {
           <CardTitle>Continents</CardTitle>
         </CardHeader>
         <CardContent className="overflow-y-auto max-h-96">
+          <Button variant="outline" size="sm" onClick={() => handleAdd('continents')}className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add
+          </Button>
           {continents.map((continent) => (
             <div key={continent.id} className="flex items-center justify-between py-2">
               <div className="flex-1 min-w-0">
               <p className="text-sm font-small leading-none break-words hyphens-auto">{continent.name}</p>
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" onClick={() => handleEdit('continents', continent.id)}>
                   Edit
                 </Button>
                 <Button variant="destructive" size="sm" onClick={() => handleDelete(continent["@id"].replace("/api", ""))}>

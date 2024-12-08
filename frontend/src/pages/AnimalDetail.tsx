@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import Animal from "@/models/Animal";
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -40,12 +41,14 @@ const AnimalDetail: React.FC = () => {
     return () => {};
   }, [id]);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+  if (loading) {
+    return ( 
+        <Button className="flex justify-center items-center" disabled>
+            <Loader2 className="animate-spin" />
+            Please wait
+        </Button>
+    )
+  }
   if (error)
     return <div className="text-red-500 text-center mt-8">{error}</div>;
   if (!animal) return <div className="text-center mt-8">Animal not found</div>;
