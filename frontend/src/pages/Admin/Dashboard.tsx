@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import instance, { verifyToken } from "@/utils/userInstance";
+import instance from "@/utils/userInstance";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus } from "lucide-react";
 import User from "@/models/User";
 import Animal from "@/models/Animal";
@@ -17,7 +12,6 @@ import Continent from "@/models/Continent";
 import DashboardForm from "@/components/DashboardForm";
 
 const AdminDashboard: React.FC = () => {
-  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
@@ -38,6 +32,7 @@ const AdminDashboard: React.FC = () => {
 
       setUsers(usersRes.data['hydra:member']);
       setAnimals(animalsRes.data['hydra:member']);
+      console.log(animalsRes.data);
       setFamilies(familiesRes.data['hydra:member']);
       setContinents(continentsRes.data['hydra:member']);
     } catch (error) {
