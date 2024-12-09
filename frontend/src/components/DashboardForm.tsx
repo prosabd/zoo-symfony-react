@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Loader2, ChevronDown } from 'lucide-react';
 import User from "@/models/User";
 import Animal from "@/models/Animal";
@@ -27,6 +29,7 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
+    const [animals, setAnimals] = useState<Animal[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,22 +41,35 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
               const itemResponse = await instance.get(`/${type.toLowerCase()}/${id}`);
               setItem(itemResponse.data);
 
-
-              // SetContinents for dropdown menu
+              // Set selectedContinents for animal form dropdown menu
               if (type === 'animals' && itemResponse.data.continents) {
-                setSelectedContinents(itemResponse.data.continents?.map(c => c.id?.toString()) || []);
-              }
+                  setSelectedContinents(itemResponse.data.continents?.map(c => c.id?.toString()) || []);
+                }
+                
+                // Fetch animals related to the continent
+                if (type === 'continents') {
+                    const animalsRes = await instance.get(`/continents/${id}`);
+                    setAnimals(animalsRes.data.animals);
+                } 
+                // Fetch all animals and filter by family
+                else if (type === 'families') {
+                    const animalsRes = await instance.get('/animals');
+                    const filteredAnimals = animalsRes.data['hydra:member'].filter(
+                        (animal: Animal) => animal.family && animal.family.id === id
+                    );
+                    setAnimals(filteredAnimals);
+                }
             }
-            
-            // Always fetch reference data
+
+            // Fetch families and continents for dropdown menus
             const [familiesRes, continentsRes] = await Promise.all([
               instance.get('/families'),
               instance.get('/continents')
             ]);
       
+            // Set Families and Continents for dropdown menus
             setFamilies(familiesRes.data['hydra:member']);
             setContinents(continentsRes.data['hydra:member']);
-            
           } catch (error) {
             console.error('Error fetching data:', error);
             setError('Failed to load data. Please try again.');
@@ -94,7 +110,6 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
           break;
       }
 
-      console.log(newItem);
       if (id) {
           await instance.patch(`/admin/dashboard/update/${type}/${id}`, newItem);
       } else {
@@ -117,7 +132,7 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{type} Form</DialogTitle>
+            <DialogTitle>{type.toUpperCase()} Form</DialogTitle>
             <DialogDescription>Fill in the form to add or edit a {type}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
@@ -186,12 +201,44 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
                 <Input type="text" id="name" name="name" defaultValue={item.name} />
                 <Label htmlFor="description">Description</Label>
                 <Textarea id="description" name="description" defaultValue={item.description} />
+                {animals.length > 0 && 
+                  <>
+                    <Label>Animals</Label>
+                    <ScrollArea className="h-72 w-full rounded-md border">
+                    <div className="p-4">
+                        {animals.map(animal => (
+                        <div key={animal.id}>
+                            <div className="text-sm">{animal.name}</div>
+                            <Separator className="my-2" />
+                        </div>
+                        ))}
+                    </div>
+                    </ScrollArea>
+                  </>
+                }
               </>
             )}
             {type === 'continents' && (
               <>
                 <Label htmlFor="name">Name</Label>
                 <Input type="text" id="name" name="name" defaultValue={item.name} />
+                {animals.length > 0 && 
+                  <>
+                    <Label>Animals</Label>
+                    <ScrollArea className="h-72 w-full rounded-md border">
+                    <div className="p-4">
+                        {animals.map(animal => (
+                            <div key={`animal-${animal.id}`}>
+                                <div className="text-sm">
+                                    {animal.name}
+                                </div>
+                                <Separator className="my-2" />
+                            </div>
+                        ))}
+                    </div>
+                    </ScrollArea>
+                  </>
+                }
               </>
             )}
             <DialogFooter className='pt-4'>

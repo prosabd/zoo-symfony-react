@@ -32,17 +32,13 @@ const Home: React.FC = () => {
       if (familyParam) {
         // Fetch family details by name
         const familyResponse = await axios.get<Family[]>(API_URL + `/families`);
-        // console.log(familyResponse.data);
         const family = familyResponse.data["hydra:member"].filter(
           (family) => family.name === familyParam
         );
-        // console.log(family[0].id);
         if (!family) throw new Error("Family not found");
 
         // Fetch animals with the family ID
-        url =
-          API_URL +
-          `/animals?family=/api/families/${family[0].id}&page=${pageNumber}`;
+        url = API_URL + `/animals?family=/api/families/${family[0].id}&page=${pageNumber}`;
       } else {
         // Fetch animals without filtering by family
         url = API_URL + `/animals?page=${pageNumber}`;
