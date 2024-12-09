@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import instance from "@/utils/userInstance";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,28 +19,42 @@ const AdminDashboard: React.FC = () => {
   const [openForm, setOpenForm] = useState(false);
   const [formType, setFormType] = useState<'users' | 'animals' | 'families' | 'continents'>('users');
   const [formId, setFormId] = useState<number | undefined>(undefined);
+  const [page, setPage] = useState<number>(1);
 
-  const fetchData = async () => {
+  const fetchData = async (pageNum: number = 1, isLoadingMore: boolean = false) => {
     try {
-      const [usersRes, animalsRes, familiesRes, continentsRes] = await Promise.all([
-        instance.get('/users'),
-        instance.get('/animals'),
-        instance.get('/families'),
-        instance.get('/continents')
-      ]);
+    const [usersRes, animalsRes, familiesRes, continentsRes] = await Promise.all([
+      instance.get(`/users?page=${pageNum}`),
+      instance.get(`/animals?page=${pageNum}`),
+      instance.get(`/families?page=${pageNum}`),
+      instance.get(`/continents?page=${pageNum}`)
+    ]);
 
+    if (isLoadingMore) {
+      // Add new items to existing lists
+      setUsers(prev => [...prev, ...usersRes.data['hydra:member']]);
+      setAnimals(prev => [...prev, ...animalsRes.data['hydra:member']]);
+      setFamilies(prev => [...prev, ...familiesRes.data['hydra:member']]);
+      setContinents(prev => [...prev, ...continentsRes.data['hydra:member']]);
+    } else {
+      // Reset lists
       setUsers(usersRes.data['hydra:member']);
       setAnimals(animalsRes.data['hydra:member']);
-      console.log(animalsRes.data);
       setFamilies(familiesRes.data['hydra:member']);
       setContinents(continentsRes.data['hydra:member']);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    } finally {
-        setLoading(false);
     }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  } finally {
+    setLoading(false);
+  }
   };
-  
+
+  const handleLoadMore = () => {
+    setPage(prev => prev + 1);
+    fetchData(page + 1, true);
+  };
+
   const handleAdd = (type: 'users' | 'animals' | 'families' | 'continents') => {
     setFormType(type);
     setFormId(undefined);
@@ -234,6 +247,13 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+    <Button 
+            onClick={handleLoadMore}
+            disabled={loading}
+            size="lg"
+          >
+            {loading ? <Loader2 className="animate-spin" size={24} /> : "Load More Data"}
+          </Button>
     </>
   );
 };
