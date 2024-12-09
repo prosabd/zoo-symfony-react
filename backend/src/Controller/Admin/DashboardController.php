@@ -59,7 +59,7 @@ class DashboardController extends AbstractController
         }
     }
 
-    #[Route('/api/admin/dashboard/update/{type}/{id}', name: 'admin_dashboard_update', methods: ['PUT'])]
+    #[Route('/api/admin/dashboard/update/{type}/{id}', name: 'admin_dashboard_update', methods: ['PATCH'])]
     public function updateItem(Request $request, string $type, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

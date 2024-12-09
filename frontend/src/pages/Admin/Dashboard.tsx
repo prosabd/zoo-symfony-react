@@ -92,12 +92,21 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-4 flex flex-row gap-4 justify-between">
-      <Card className="">
+    <>
+    {openForm && (
+      <DashboardForm
+        type={formType}
+        id={formId}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+      />
+    )}
+    <div className="p-4 flex flex-row gap-4 max-h-[85vh] min-h-[30vh] justify-between">
+      <Card className="pb-20">
         <CardHeader>
           <CardTitle>Users</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-y-auto max-h-96">
+        <CardContent className="overflow-y-auto min-h-[30vh] max-h-full">
           <Button variant="outline" size="sm" onClick={() => handleAdd('users')}className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add
@@ -126,11 +135,11 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="w-2/5">
+      <Card className="pb-20">
         <CardHeader>
           <CardTitle>Animals</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-y-auto max-h-96">
+        <CardContent className="overflow-y-auto min-h-[30vh] max-h-full">
           <Button variant="outline" size="sm" onClick={() => handleAdd('animals')}className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add
@@ -173,20 +182,11 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      {openForm && (
-        <DashboardForm
-          type={formType}
-          id={formId}
-          onClose={handleFormClose}
-          onSubmit={handleFormSubmit}
-        />
-      )}
-
-      <Card className="">
+      <Card className="pb-20">
         <CardHeader>
           <CardTitle>Families</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-y-auto max-h-96">
+        <CardContent className="overflow-y-auto min-h-[30vh] max-h-full">
           <Button variant="outline" size="sm" onClick={() => handleAdd('families')}className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add
@@ -212,11 +212,11 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="">
+      <Card className="pb-20">
         <CardHeader>
           <CardTitle>Continents</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-y-auto max-h-96">
+        <CardContent className="overflow-y-auto min-h-[30vh] max-h-full">
           <Button variant="outline" size="sm" onClick={() => handleAdd('continents')}className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add
@@ -239,6 +239,7 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

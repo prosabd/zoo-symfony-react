@@ -43,7 +43,7 @@ class AnimalService
         if (!$animal) {
             throw new \Exception('Animal not found');
         }
-        // ...existing code...
+
         if (isset($data['name'])) $animal->setName($data['name']);
         if (isset($data['description'])) $animal->setDescription($data['description']);
         if (isset($data['family'])) {
