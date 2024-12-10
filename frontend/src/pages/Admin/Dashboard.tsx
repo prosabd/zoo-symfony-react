@@ -10,6 +10,15 @@ import Family from "@/models/Family";
 import Continent from "@/models/Continent";
 import DashboardForm from "@/components/DashboardForm";
 
+type EntityType = 'users' | 'animals' | 'families' | 'continents';
+
+interface PaginationState {
+  [key: string]: {
+    page: number;
+    hasMore: boolean;
+  };
+}
+
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [animals, setAnimals] = useState<Animal[]>([]);
@@ -19,49 +28,78 @@ const AdminDashboard: React.FC = () => {
   const [openForm, setOpenForm] = useState(false);
   const [formType, setFormType] = useState<'users' | 'animals' | 'families' | 'continents'>('users');
   const [formId, setFormId] = useState<number | undefined>(undefined);
-  const [page, setPage] = useState<number>(1);
+  const [pagination, setPagination] = useState<PaginationState>({
+    users: { page: 1, hasMore: false },
+    animals: { page: 1, hasMore: false },
+    families: { page: 1, hasMore: false },
+    continents: { page: 1, hasMore: false }
+  });
 
-  const fetchData = async (pageNum: number = 1, isLoadingMore: boolean = false) => {
-    try {
-    const [usersRes, animalsRes, familiesRes, continentsRes] = await Promise.all([
-      instance.get(`/users?page=${pageNum}`),
-      instance.get(`/animals?page=${pageNum}`),
-      instance.get(`/families?page=${pageNum}`),
-      instance.get(`/continents?page=${pageNum}`)
-    ]);
-
-    if (isLoadingMore) {
-      // Add new items to existing lists
-      setUsers(prev => [...prev, ...usersRes.data['hydra:member']]);
-      setAnimals(prev => [...prev, ...animalsRes.data['hydra:member']]);
-      setFamilies(prev => [...prev, ...familiesRes.data['hydra:member']]);
-      setContinents(prev => [...prev, ...continentsRes.data['hydra:member']]);
-    } else {
-      // Reset lists
-      setUsers(usersRes.data['hydra:member']);
-      setAnimals(animalsRes.data['hydra:member']);
-      setFamilies(familiesRes.data['hydra:member']);
-      setContinents(continentsRes.data['hydra:member']);
+  const fetchData = async (type?: EntityType, pageNum: number = 1, isLoadingMore: boolean = false
+    ) => {
+    setLoading(true);
+    if (!type) {
+      Object.entries(pagination).forEach(([entityType]) => {
+        fetchData(entityType as EntityType);
+      });
+      return;
     }
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  } finally {
-    setLoading(false);
-  }
+    try {
+      const response = await instance.get(`/${type}?page=${pageNum}`);
+      const setterClass = {
+        users: setUsers,
+        animals: setAnimals,
+        families: setFamilies,
+        continents: setContinents
+      };
+  
+      if (isLoadingMore) {
+        setterClass[type](prev => [...prev, ...response.data['hydra:member']]);
+      } else {
+        setterClass[type](response.data['hydra:member']);
+      }
+      
+      const view = response.data['hydra:view'] || {};
+      setPagination(prev => ({
+        ...prev,
+        [type]: {
+          page: pageNum,
+          hasMore: view['@id'] !== view['hydra:last']
+        }
+      }));
+    } catch (error) {
+      console.error(`Error fetching ${type}:`, error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLoadMore = () => {
-    setPage(prev => prev + 1);
-    fetchData(page + 1, true);
+  const handleLoadMore = (type: EntityType) => {
+    const nextPage = pagination[type].page + 1;
+    fetchData(type, nextPage, true);
   };
 
-  const handleAdd = (type: 'users' | 'animals' | 'families' | 'continents') => {
+  // Reusable LoadMoreButton component
+  const LoadMoreButton = ({ type, loading }: { type: EntityType; loading: boolean }) => (
+    pagination[type].hasMore && (
+      <Button 
+        onClick={() => handleLoadMore(type)}
+        disabled={loading}
+        size="lg"
+        className="mt-4 flex justify-center items-center w-full"
+      >
+        {loading ? <Loader2 className="animate-spin" /> : "Load More"}
+      </Button>
+    )
+  );
+
+  const handleAdd = (type: EntityType) => {
     setFormType(type);
     setFormId(undefined);
     setOpenForm(true);
   };
 
-  const handleEdit = (type: 'users' | 'animals' | 'families' | 'continents', id: number) => {
+  const handleEdit = (type: EntityType, id: number) => {
     setFormType(type);
     setFormId(id);
     setOpenForm(true);
@@ -78,27 +116,18 @@ const AdminDashboard: React.FC = () => {
 
   const handleFormClose = () => {
     setOpenForm(false);
-    fetchData();
+    fetchData(formType);
   };
 
   const handleFormSubmit = () => {
     setOpenForm(false);
-    fetchData();
+    fetchData(formType);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  if (loading) {
-    return ( 
-        <Button className="flex justify-center items-center" disabled>
-            <Loader2 className="animate-spin" />
-            Please wait
-        </Button>
-    )
-  }
-
+  
   return (
     <>
     {openForm && (
@@ -140,6 +169,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           ))}
+        <LoadMoreButton type="users" loading={loading} />
         </CardContent>
       </Card>
 
@@ -187,6 +217,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           ))}
+          <LoadMoreButton type="animals" loading={loading} />
         </CardContent>
       </Card>
 
@@ -217,6 +248,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           ))}
+          <LoadMoreButton type="families" loading={loading} />
         </CardContent>
       </Card>
 
@@ -244,16 +276,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           ))}
+          <LoadMoreButton type="continents" loading={loading} />
         </CardContent>
       </Card>
     </div>
-    <Button 
-            onClick={handleLoadMore}
-            disabled={loading}
-            size="lg"
-          >
-            {loading ? <Loader2 className="animate-spin" size={24} /> : "Load More Data"}
-          </Button>
     </>
   );
 };
