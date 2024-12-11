@@ -24,7 +24,6 @@ class AuthController extends AbstractController
     public function register(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
         // Validate input
         if (!isset($data['email']) || !isset($data['password'])) {
             return $this->json([
@@ -45,8 +44,9 @@ class AuthController extends AbstractController
         // Create new user
         $user = new User();
         $user->setEmail($data['email']);
+
         // Get username or the content before @ on the mail
-        $user->setCustomUsername($data['username'] ?? explode('@', $data['email'], )[0]);
+        $user->setCustomUsername($data['customUsername'] ?? explode('@', $data['email'], )[0]);
         
         // Hash password
         $hashedPassword = $this->passwordHasher->hashPassword(
@@ -55,8 +55,11 @@ class AuthController extends AbstractController
         );
         $user->setPassword($hashedPassword);
 
-        $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+        // Set roles and admin rights
+        $user->setRoles($data['roles'] ?? ['ROLE_USER', 'ROLE_ADMIN']);
+        $user->setAdmin($data['admin'] ?? true);
 
+        // dd($user);
         // Save user
         $this->entityManager->persist($user);
         $this->entityManager->flush();

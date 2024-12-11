@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 // Set the base URL for API from the environment variable
@@ -57,7 +56,7 @@ export const logout = () => {
 
 // Create an Axios instance with a base URL 
 const instance: AxiosInstance = axios.create({
-    baseURL: API_URL,
+    baseURL: API_URL
 });
 
 // Add JWT token to requests

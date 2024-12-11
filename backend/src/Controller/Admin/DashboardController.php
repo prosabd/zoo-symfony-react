@@ -6,13 +6,13 @@ use App\Service\UserService;
 use App\Service\AnimalService;
 use App\Service\FamilyService;
 use App\Service\ContinentService;
+use App\Controller\AuthController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasherInterface\UserPasswordHasherInterface;
 
 class DashboardController extends AbstractController
 {
@@ -21,29 +21,34 @@ class DashboardController extends AbstractController
     private AnimalService $animalService;
     private FamilyService $familyService;
     private ContinentService $continentService;
+    private AuthController $authController;
 
     public function __construct(
         EntityManagerInterface $em,
         UserService $userService,
         AnimalService $animalService,
         FamilyService $familyService,
-        ContinentService $continentService
+        ContinentService $continentService,
+        AuthController $authController
     ) {
         $this->em = $em;
         $this->userService = $userService;
         $this->animalService = $animalService;
         $this->familyService = $familyService;
         $this->continentService = $continentService;
+        $this->authController = $authController;
     }
 
     #[Route('/api/admin/dashboard/add/{type}', name: 'admin_dashboard_add', methods: ['POST'])]
     public function addItem(Request $request, string $type): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
         try {
+            if ($type === 'users') {
+                return $this->authController->register($request);
+            }
+
+            $data = json_decode($request->getContent(), true);
             $entity = match($type) {
-                'users' => $this->userService->createUser($data),
                 'animals' => $this->animalService->createAnimal($data),
                 'families' => $this->familyService->createFamily($data),
                 'continents' => $this->continentService->createContinent($data),

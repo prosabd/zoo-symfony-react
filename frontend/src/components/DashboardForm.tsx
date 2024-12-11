@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, ChevronDown } from 'lucide-react';
+import { Loader2, ChevronDown, AlertCircle } from 'lucide-react';
 import User from "@/models/User";
 import Animal from "@/models/Animal";
 import Family from "@/models/Family";
@@ -27,7 +28,10 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
     const [families, setFamilies] = useState<Family[]>([]);
     const [continents, setContinents] = useState<Continent[]>([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<{ error: string | null, formError: string | null }>({
+        error: null,
+        formError: null,
+    });
     const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
     const [animals, setAnimals] = useState<Animal[]>([]);
 
@@ -72,50 +76,62 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
             setContinents(continentsRes.data['hydra:member']);
           } catch (error) {
             console.error('Error fetching data:', error);
-            setError('Failed to load data. Please try again.');
+            setErrors(prev => ({ ...prev, error: 'Failed to load data. Please try again.' }));
           } finally {
             setLoading(false);
           }
         };
       
         fetchData();
-      }, [id, type]);
+    }, [id, type]);
   
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      setErrors({ error: null, formError: null }); // Reset errors
       const formData = new FormData(event.currentTarget);
       const newItem: Partial<User | Animal | Family | Continent> = {} as any;
   
-      switch (type) {
-        case 'users':
-          newItem.customUsername = formData.get('customUsername') as string;
-          newItem.email = formData.get('email') as string;
-          newItem.isAdmin = true;
-          newItem.roles = ['ROLE_USER', 'ROLE_ADMIN'];
-          break;
-        case 'animals':
-          newItem.name = formData.get('name') as string;
-          newItem.description = formData.get('description') as string;
-          newItem.family = `/api/families/${formData.get('family')}`;
-          newItem.continents = selectedContinents.map(
-            (id) => `/api/continents/${id}`
-          );
-          break;
-        case 'families':
-          newItem.name = formData.get('name') as string;
-          newItem.description = formData.get('description') as string;
-          break;
-        case 'continents':
-          newItem.name = formData.get('name') as string;
-          break;
+      try {
+        switch (type) {
+            case 'users':
+                newItem.customUsername = formData.get('customUsername') as string;
+                newItem.email = formData.get('email') as string;
+                newItem.isAdmin = true;
+                newItem.roles = ['ROLE_USER', 'ROLE_ADMIN'];
+                if (!id) {
+                    newItem.password = formData.get('password') as string;
+                }
+                break;
+            case 'animals':
+                newItem.name = formData.get('name') as string;
+                newItem.description = formData.get('description') as string;
+                newItem.family = `/api/families/${formData.get('family')}`;
+                newItem.continents = selectedContinents.map(
+                    (id) => `/api/continents/${id}`
+                );
+                break;
+            case 'families':
+                newItem.name = formData.get('name') as string;
+                newItem.description = formData.get('description') as string;
+                break;
+            case 'continents':
+                newItem.name = formData.get('name') as string;
+                break;
+        }
+        
+        if (id) {
+            await instance.patch(`/admin/dashboard/update/${type}/${id}`, newItem);
+        } else {
+            await instance.post(`/admin/dashboard/add/${type}`, newItem);
+        }
+        onSubmit(newItem);
+      } catch (err) {
+        if (err.response?.status === 409) {
+            setErrors(prev => ({ ...prev, formError: 'User already exists with this email address' }));
+        } else {
+            setErrors(prev => ({ ...prev, error: 'An unexpected error occurred' }));
+        }
       }
-
-      if (id) {
-          await instance.patch(`/admin/dashboard/update/${type}/${id}`, newItem);
-      } else {
-          await instance.post(`/admin/dashboard/add/${type}`, newItem);
-      }
-      onSubmit(newItem);
     };
 
     if (loading) {
@@ -126,7 +142,7 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
             </Button>
         )
       }
-    if (error) return <div className="text-red-500">{error}</div>;
+    if (errors.error) return <div className="text-red-500">{errors.error}</div>;
   
     return (
       <Dialog open={true} onOpenChange={onClose}>
@@ -141,7 +157,13 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
                 <Label htmlFor="customUsername">Custom Username</Label>
                 <Input type="text" id="customUsername" name="customUsername" defaultValue={item.customUsername} />
                 <Label htmlFor="email">Email</Label>
-                <Input type="email" id="email" name="email" defaultValue={item.email} />
+                <Input type="email" id="email" name="email" defaultValue={item.email} required/>
+                {!id &&
+                  <>
+                    <Label htmlFor="password">Password</Label>
+                    <Input type="password" id="password" name="password" required/>
+                  </>
+                }
               </>
             )}
             {type === 'animals' && (
@@ -240,6 +262,12 @@ const DashboardForm = ({ id, type, onClose, onSubmit }: DashboardFormProps) => {
                   </>
                 }
               </>
+            )}
+            {errors.formError && (
+            <Alert variant="destructive" className="my-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle className="pt-1">{errors.formError}</AlertTitle>
+            </Alert>
             )}
             <DialogFooter className='pt-4'>
               <Button variant="outline" size="lg" onClick={onClose}>Cancel</Button>
