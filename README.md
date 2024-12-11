@@ -4,12 +4,15 @@
 
 ZooExplore is a comprehensive web application designed for managing and showcasing an animal park's collection. The project provides an interactive platform for visitors to explore animals and an administrative interface for park management.
 
+![image](https://github.com/prosabd/zoo-symfony-react/releases/download/README/home.png)
+
 ### Key Features
 - Public animal catalog with detailed information
 - Secure administrative data management
 - Responsive and modern web interface
 - Easy-to-use animal information system
 
+![image](https://github.com/prosabd/zoo-symfony-react/releases/download/README/detail.png)
 ## Technical Stack
 
 ### Backend
@@ -20,7 +23,9 @@ ZooExplore is a comprehensive web application designed for managing and showcasi
 
 ### Frontend
 - Framework: Vite React
-- Styling: To be specified
+- Styling: Typescript, Tailwind CSS
+- Routing: React Router
+- UI Components: ShadCN UI
 
 ## Installation Guide
 
@@ -33,13 +38,13 @@ ZooExplore is a comprehensive web application designed for managing and showcasi
 #### Steps
 ```bash
 # Clone the repository
-git clone https://github.com/[your-username]/ZooExplore.git
-cd ZooExplore
+git clone https://github.com/prosabd/zoo-symfony-react.git
+cd zoo-symfony-react
 
 # Start the Docker containers
 docker-compose up -d
 
-# Initial setup (if needed)
+# Initial setup
 docker-compose exec php composer install
 docker-compose exec php php bin/console doctrine:migrations:migrate
 
@@ -105,16 +110,43 @@ mysql -u your_username -p zoo < zoo.sql
 ```
 
 ## Access the Application
+**Backend API documentation is available at:** http://localhost:8000/api/docs
 
-Frontend: http://localhost:3000
-API Platform: http://localhost:8000/api
+**Frontend application:** http://localhost:3000
+
+![image](https://github.com/prosabd/zoo-symfony-react/releases/download/README/animals.png)
+## Authentication
+
+- Admin access is secured via JWT tokens
+- Use the dedicated admin interface for users, animals, families, continents data management
+
+**Default credentials:**   
+
+    Emails: 
+     
+     +---------------------+----------------------------+
+     | email               | roles                      |
+     +---------------------+----------------------------+
+     | user@test.com       | ["ROLE_USER"]              |
+     | user-test@test.com  | ["ROLE_USER"]              |
+     | admin@test.com      | ["ROLE_USER","ROLE_ADMIN"] |
+     | admin-test@test.com | ["ROLE_USER","ROLE_ADMIN"] |
+     +---------------------+----------------------------+
+
+    Password: password
+
+![image](https://github.com/prosabd/zoo-symfony-react/releases/download/README/login.png)
+
+### Protected Actions
+**Only authenticated admin users can:**
+
+    - Edit entities
+    - Delete entities
+    - Create new entities
+
+![image](https://github.com/prosabd/zoo-symfony-react/releases/download/README/dashboard.png)
 
 ## Current Project Status
 
 ⚠️ **Docker Configuration Note**: 
 The Docker setup is currently being refined. While it may not work perfectly, we are actively addressing configuration issues. Manual installation is recommended for the most stable experience.
-
-## Authentication
-
-- Admin access is secured via JWT tokens
-- Use the dedicated admin interface for animal data management
