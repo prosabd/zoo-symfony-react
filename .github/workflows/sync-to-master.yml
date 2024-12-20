@@ -1,0 +1,40 @@
+name: Sync dev to master
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "prosabd"
+        git config --global user.email ${{ secrets.MAIL_SECRET }}
+
+    - name: Checkout master branch
+      run: |
+        git checkout master || git checkout --orphan master
+
+    - name: Sync dev to master
+      run: |
+        # Merge changes from dev to master, keeping master-specific files
+        git merge --strategy=ours --no-commit dev
+        
+        # Checkout files from dev, excluding docker-compose.yml and ./backend/docker/
+        git checkout dev -- . ':!docker-compose.yml' ':!backend/docker/'
+        
+        # Stage the changes
+        git add .
+        
+        # Commit and push the changes
+        git commit -m "Sync dev to master, excluding docker-compose.yml and ./backend/docker/"
+        git push origin master
