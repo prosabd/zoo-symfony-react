@@ -32,6 +32,11 @@ COPY . .
 # Generate autoloader
 RUN composer dump-autoload --optimize
 
+# Generate JWT keys and set permissions
+RUN mkdir -p config/jwt \
+    && php bin/console lexik:jwt:generate-keypair --no-interaction \
+    && chown -R www-data:www-data config/jwt
+
 # Copy configuration files
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf

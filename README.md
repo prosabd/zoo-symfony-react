@@ -103,8 +103,6 @@ npm run dev
 The project includes a pre-configured SQL dump to quickly populate the database with initial data:
 
 ```bash
-# If using Docker it's already done
-
 # Manual installation
 mysql -u your_username -p zoo < zoo.sql
 ```
