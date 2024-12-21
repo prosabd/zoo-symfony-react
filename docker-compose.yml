@@ -9,8 +9,8 @@ services:
       - ./backend:/var/www/html:cached
       - ./backend/vendor:/var/www/html/vendor:delegated
     environment:
-      - APP_ENV=dev
-      - DATABASE_URL=mysql://root:@db:3306/zoo
+      - APP_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
     networks:
       - symfony-react-network
 
