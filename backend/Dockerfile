@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
+    supervisor \
+    nginx \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -30,8 +32,15 @@ COPY . .
 # Generate autoloader
 RUN composer dump-autoload --optimize
 
+# Generate JWT keys and set permissions
+RUN mkdir -p config/jwt \
+    && php bin/console lexik:jwt:generate-keypair --no-interaction \
+    && chown -R www-data:www-data config/jwt
+
 # Copy configuration files
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Create the storage directory
 RUN mkdir -p /var/www/html/storage

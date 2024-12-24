@@ -41,6 +41,10 @@ ZooExplore is a comprehensive web application designed for managing and showcasi
 git clone https://github.com/prosabd/zoo-symfony-react.git
 cd zoo-symfony-react
 
+# Configure database connection in .env file
+cp .env .env.local
+# Edit .env.local with your database credentials
+
 # Start the Docker containers
 docker-compose up -d
 
@@ -103,8 +107,6 @@ npm run dev
 The project includes a pre-configured SQL dump to quickly populate the database with initial data:
 
 ```bash
-# If using Docker it's already done
-
 # Manual installation
 mysql -u your_username -p zoo < zoo.sql
 ```
