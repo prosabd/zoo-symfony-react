@@ -42,21 +42,6 @@ services:
     networks:
       - symfony-react-network
 
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_DATABASE=zoo
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    networks:
-      - symfony-react-network
-
-volumes:
-  mysql_data:
-
 networks:
   symfony-react-network:
     driver: bridge
