@@ -104,14 +104,23 @@ class AppFixtures extends Fixture
             $manager->persist($animal);
         }
 
-        // Create a default admin user
-        $adminUser = new User();
-        $adminUser->setUsername('admin');
-        $adminUser->setMail('admin@example.com');
-        $adminUser->setPassword($this->passwordHasher->hashPassword($adminUser, 'admin_password'));
-        $adminUser->setAdmin(true);
-        $adminUser->setRole(['ROLE_ADMIN']);
-        $manager->persist($adminUser);
+        // Create Users
+        $users = [
+            ['user', 'user@test.com', false],
+            ['user-test', 'user-test@test.com', false],
+            ['admin', 'admin@test.com', true],
+            ['admin-test', 'admin-test@test.com', true],
+        ];
+
+        foreach ($users as [$username, $email, $isAdmin]) {
+            $user = new User();
+            $user->setCustomUsername($username);
+            $user->setEmail($email);
+            $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
+            $user->setAdmin($isAdmin);
+            $user->setRoles($isAdmin ? ['ROLE_USER', 'ROLE_ADMIN'] : ['ROLE_USER']);
+            $manager->persist($user);
+        }
 
         $manager->flush();
     }

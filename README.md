@@ -51,6 +51,7 @@ docker-compose up -d
 # Initial setup
 docker-compose exec php composer install
 docker-compose exec php php bin/console doctrine:migrations:migrate
+docker-compose exec php php bin/console doctrine:fixtures:load
 
 # Frontend setup
 docker-compose exec node npm install
@@ -96,19 +97,15 @@ symfony console lexik:jwt:generate-keypair
 # or
 php bin/console lexik:jwt:generate-keypair
 
+# Initial data from fixtures
+symfony console doctrine:fixtures:load
+# or
+php bin/console doctrine:fixtures:load
+
 # Frontend setup
 cd ../frontend
 npm install
 npm run dev
-```
-
-## Database Initialization
-
-The project includes a pre-configured SQL dump to quickly populate the database with initial data:
-
-```bash
-# Manual installation
-mysql -u your_username -p zoo < zoo.sql
 ```
 
 ## Access the Application
