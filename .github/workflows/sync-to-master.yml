@@ -30,11 +30,11 @@ jobs:
         git merge --strategy=ours --no-commit dev
         
         # Checkout files from dev, excluding docker-compose.yml and ./backend/docker/
-        git checkout dev -- . ':!docker-compose.yml' ':!backend/docker/'
+        git checkout dev -- . ':!docker-compose.yml' ':!backend/docker/' ':!backend/Dockerfile'
         
         # Stage the changes
         git add .
         
         # Commit and push the changes
-        git commit -m "Sync dev to master, excluding docker-compose.yml and ./backend/docker/"
+        git commit -m "Sync dev to master, excluding docker-compose.yml and ./backend/docker/ and ./backend/Dockerfile"
         git push origin master
