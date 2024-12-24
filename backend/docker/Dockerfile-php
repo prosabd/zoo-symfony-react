@@ -22,10 +22,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 RUN composer self-update
 
-RUN wget --no-check-certificate https://phar.phpunit.de/phpunit-6.5.3.phar && \
-    mv phpunit*.phar phpunit.phar && \
-    chmod +x phpunit.phar && \
-    mv phpunit.phar /usr/local/bin/phpunit
+# RUN wget --no-check-certificate https://phar.phpunit.de/phpunit-6.5.3.phar && \
+#     mv phpunit*.phar phpunit.phar && \
+#     chmod +x phpunit.phar && \
+#     mv phpunit.phar /usr/local/bin/phpunit
 
 # Créer le groupe www-data avec GID 1000 s'il n'existe pas
 RUN groupadd -f -g 1000 www-data
