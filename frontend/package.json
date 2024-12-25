@@ -31,10 +31,10 @@
   },
   "scripts": {
     "dev": "vite --port 3000",
-    "build": "tsc -b && vite build --port 3000",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "vite preview --port 3000",
+    "start": "npx vite preview",
     "scan": "vite --port 3000 & npx react-scan@latest localhost:3000"
   },
   "devDependencies": {
