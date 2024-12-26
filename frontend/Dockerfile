@@ -9,6 +9,9 @@ USER node
 RUN npm install
 
 COPY . .
+## If permissions errors of /app/src occurs, change to this :
+#    COPY --chown=node:node . .
+##
 
 RUN npm run build
 
