@@ -50,4 +50,10 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
+
+# Entrypoint script for migrations and jwt 
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
+
 CMD ["php-fpm"]

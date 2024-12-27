@@ -52,6 +52,8 @@ services:
       - ./backend:/var/www/html
     networks:
       - symfony-react-network
+    depends_on:
+      - db
 
   db:
     image: mysql:8.0

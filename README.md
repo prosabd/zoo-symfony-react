@@ -47,11 +47,6 @@ cp .env .env.local
 
 # Start the Docker containers
 docker-compose up -d
-
-# Initial setup
-docker-compose exec fpm composer install
-docker-compose exec fpm php bin/console doctrine:migrations:migrate -n
-docker-compose exec fpm php bin/console doctrine:fixtures:load -n
 ```
 
 ### 💻 Option 2: Manual Installation
