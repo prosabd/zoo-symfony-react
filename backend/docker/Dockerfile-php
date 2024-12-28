@@ -31,12 +31,10 @@ RUN composer self-update
 RUN groupadd -f -g 1000 www-data
 # Modifier l'utilisateur www-data pour utiliser l'UID 1000 et le GID 1000
 RUN usermod -u 1000 www-data
-# RUN usermod -g 1000 www-data
 
 RUN usermod -a -G www-data root
 RUN mkdir -p /var/www/html
 RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 777 /var/www/html/public
 RUN mkdir -p /var/www/.composer
 RUN chown -R www-data:www-data /var/www/.composer
 

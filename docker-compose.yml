@@ -5,7 +5,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/var/www/html:cached
-      - ./backend/vendor:/var/www/html/vendor:delegated
     environment:
       - APP_ENV=production
       - DATABASE_URL=${DATABASE_URL}
