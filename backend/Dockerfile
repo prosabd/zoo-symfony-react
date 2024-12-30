@@ -23,11 +23,11 @@ WORKDIR /var/www/html
 # Copy composer files
 COPY composer.json composer.lock ./
 
-# Install dependencies
-RUN composer install --prefer-dist --no-scripts --no-dev --no-autoloader && rm -rf /root/.composer
-
 # Copy project files
 COPY . .
+
+# Install dependencies
+RUN composer install --prefer-dist --no-scripts --no-autoloader && rm -rf /root/.composer
 
 # Generate autoloader
 RUN composer dump-autoload --optimize
