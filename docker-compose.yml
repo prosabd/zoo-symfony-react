@@ -10,6 +10,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
     networks:
       - symfony-react-network
+      - shared-network
 
   frontend:
     build:
@@ -25,6 +26,7 @@ services:
       - "3000:3000"
     networks:
       - symfony-react-network
+      - shared-network
 
   fpm:
     build:
@@ -38,7 +40,11 @@ services:
       - "9000:9000"
     networks:
       - symfony-react-network
+      - shared-network
 
 networks:
   symfony-react-network:
     driver: bridge
+  shared-network:
+    external: true
+    name: shared-network
