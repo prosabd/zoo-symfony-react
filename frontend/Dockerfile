@@ -13,6 +13,7 @@ COPY . .
 #    COPY --chown=node:node . .
 ##
 
+RUN npm run type-check
 RUN npm run build
 
 EXPOSE 3000
