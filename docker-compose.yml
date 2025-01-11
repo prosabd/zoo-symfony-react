@@ -38,6 +38,8 @@ services:
       - ./backend:/var/www/html
     ports:
       - "9000:9000"
+    depends_on:
+      - backend 
     networks:
       - symfony-react-network
       - shared-network
