@@ -26,3 +26,6 @@
 # Ignores the .env file
 .env
 .env.local
+
+# Ignore sql data files
+*.sql
